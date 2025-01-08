@@ -26,12 +26,12 @@ export default function RootLayout({ children }) {
       >
         <div className="flex h-screen">
           {/* Sidebar */}
-          <Sidebar />
+          {/* <Sidebar /> */}
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
-            <Navbar />
-            <main className=" p-4">{children}</main>
+            {/* <Navbar /> */}
+            <main className="">{children}</main>
           </div>
         </div>
       </body>
