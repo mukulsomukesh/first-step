@@ -10,17 +10,13 @@ export default {
       colors: {
         background: "#f1f4f9", // Light background color
         primary: {
-          50: "hsl(250, 100%, 97.6%)", // Very light violet
-          100: "hsl(251, 91.3%, 95.5%)", 
-          200: "hsl(250, 95.2%, 91.8%)", 
-          300: "hsl(252, 94.7%, 85.1%)", 
-          400: "hsl(255, 91.7%, 76.3%)", 
-          500: "hsl(258, 89.5%, 66.3%)", // Primary violet
-          600: "hsl(262, 83.3%, 57.8%)", 
-          700: "hsl(263, 70%, 50.4%)", 
-          800: "hsl(263, 69.3%, 42.2%)", 
-          900: "hsl(263, 67.4%, 34.9%)", 
-          950: "hsl(265, 61.5%, 21.4%)", // Deep violet
+          50: "#f1f4f9", // Very light violet
+          100: "#c7d2ff", 
+          200: "#8b97f9", 
+          300: "#676be3", 
+          400: "#6464f2", 
+          500: "#352fa5", 
+          600: "hsl(265, 61.5%, 21.4%)", // Deep violet
         },
         success: {
           50: "#e7fef3", // Light green
