@@ -35,7 +35,6 @@ export default function TextEditor() {
     'strike',
     'blockquote',
     'list',
-    'bullet',
     'link',
     'image',
     'align',
@@ -55,13 +54,13 @@ export default function TextEditor() {
 
   return (
       <div className="h-screen flex items-center w-full flex-col">
-        <div className="h-full w-[90%] ">
+        <div className="h-full w-[100%] ">
           <ReactQuill
             value={content}
             onChange={handleEditorChange}
             modules={quillModules}
             formats={quillFormats}
-            className="w-full h-[70%] mt-10 bg-white"
+            className="w-full h-full bg-white text-[16px] "
           />
         </div>
       </div>
