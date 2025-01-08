@@ -22,16 +22,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-black `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black `}
       >
-        <div className="flex h-screen">
+        <div className="flex">
           {/* Sidebar */}
           {/* <Sidebar /> */}
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
-            {/* <Navbar /> */}
-            <main className="">{children}</main>
+            <Navbar />
+            <main className="mt-16 p-4 ">{children}</main>
           </div>
         </div>
       </body>
