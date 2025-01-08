@@ -15,10 +15,10 @@ const ProfileDropdown = () => {
         <FaUserCircle className="text-primary-950 text-4xl" />
       </button>
       {isOpen && (
-        <ul className="absolute min-w-[200px] right-0 mt-2 bg-primary-100 shadow rounded-md overflow-hidden">
-          <li className="p-2 hover:bg-primary-950 hover:text-primary-100 cursor-pointer">Profile</li>
-          <li className="p-2 hover:bg-primary-950 hover:text-primary-100 cursor-pointer">Settings</li>
-          <li className="p-2 hover:bg-primary-950 hover:text-primary-100 cursor-pointer">Logout</li>
+        <ul className="absolute min-w-[200px] right-0 mt-2 bg-primary-100 shadow rounded-md overflow-hidden ">
+          <li className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer">Profile</li>
+          <li className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer">Settings</li>
+          <li className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer">Logout</li>
         </ul>
       )}
     </div>
