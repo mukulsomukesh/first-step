@@ -6,15 +6,24 @@ const ButtonCommon = ({
   isLoading = false, 
   disabled = false, 
   className = '', 
-  icon 
+  icon, 
+  variant = 'solid' // Default variant is primary
 }) => {
+  // Define styles for different variants
+  const variants = {
+    solid: 'bg-primary-400 text-white border-primary-400 hover:bg-white hover:text-primary-400',
+    outline: 'hover:bg-primary-400 hover:text-white border-primary-400 bg-white text-primary-400',
+    danger: 'bg-red-500 text-white border-red-500 hover:bg-white hover:text-red-500',
+    success: 'bg-green-500 text-white border-green-500 hover:bg-white hover:text-green-500',
+  };
+
   return (
     <button
       onClick={onClick}
       disabled={isLoading || disabled}
-      className={`p-3 text-[16px] rounded-md text-primary-100 bg-primary-950 
-        border-2 border-primary-950 hover:bg-primary-100 hover:text-primary-950 transition-all duration-300 ease-in-out 
-        ${disabled ? 'bg-gray-400 cursor-not-allowed' : ''} ${className}`}
+      className={`p-3 text-[16px] rounded-md border-2 transition-all duration-300 ease-in-out 
+        ${disabled ? 'bg-gray-400 cursor-not-allowed text-white border-gray-400' : variants[variant]} 
+        ${className}`}
     >
       {isLoading ? (
         <span className="flex items-center justify-center">
@@ -22,7 +31,7 @@ const ButtonCommon = ({
           Loading...
         </span>
       ) : (
-        <strong className="mx-auto">
+        <strong className="flex items-center justify-center">
           {icon && <span className="mr-2">{icon}</span>}
           {label}
         </strong>
