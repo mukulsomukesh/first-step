@@ -23,6 +23,7 @@ export default function NoteEditorPage() {
   const router = useRouter();
 
   // State
+  const [editedTitle, setEditedTitle] = useState(null); // Note data fetched from the backend
   const [noteData, setNoteData] = useState(null); // Note data fetched from the backend
   const [editedContent, setEditedContent] = useState(""); // Note content being edited
   const [editedReminders, setEditedReminders] = useState([]); // Reminder list being edited
@@ -38,6 +39,7 @@ export default function NoteEditorPage() {
 
         // Update state with fetched data
         setNoteData(data);
+        setEditedTitle(data.note.title);
         setEditedContent(data.note.content);
         setEditedReminders(data.reminder || []);
       } catch (error) {
@@ -57,11 +59,19 @@ export default function NoteEditorPage() {
       content: editedContent,
     };
 
+    const payload = {
+      reminderEnabled: true,
+      content: editedContent,
+      title: editedTitle,
+    };
+
     try {
-      await updateNoteByIDService(noteId, updatedNote, editedReminders);
-      console.log("Note successfully updated");
+      await updateNoteByIDService(noteId, payload);
+
+      toast.success("Note successfully updated");
     } catch (error) {
       console.error("Error saving note changes:", error);
+      toast.error("Failed to updated the note")
     }
   };
 
@@ -97,8 +107,7 @@ export default function NoteEditorPage() {
     </div>
   );
 
-
-  // delete note 
+  // delete note
   const handelDeleteNote = async () => {
     try {
       const data = await deleteNoteByIDService(noteId);
@@ -121,7 +130,10 @@ export default function NoteEditorPage() {
             <InputCommon
               placeholder="Enter Note Title"
               type="text"
-              value={noteData.note.title}
+              value={editedTitle}
+              onChange={(e) => {
+                setEditedTitle(e.target.value);
+              }}
               aria-label="Note Title" // Accessibility improvement
             />
 

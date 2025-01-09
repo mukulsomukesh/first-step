@@ -38,10 +38,10 @@ export const userNotesListService = (payload) => {
   
 
   //  list of user notes
-  export const updateNoteByIDService = (id) => {
+  export const updateNoteByIDService = (id, payload) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let response = await axiosInstance.put(`/api/notes/edit/${id}`);
+        let response = await axiosInstance.put(`/api/notes/edit/${id}`,payload);
         resolve(response);
       } catch (error) {
         reject({ message: error });
