@@ -140,7 +140,7 @@ export default function NoteEditorPage() {
             {/* Text Editor */}
             <TextEditor
               initialValue={editedContent}
-              onChange={(newContent) => setEditedContent(newContent)}
+              onContentChange ={(newContent) => setEditedContent(newContent)}
             />
           </div>
         ) : (
@@ -154,12 +154,12 @@ export default function NoteEditorPage() {
         <ReminderList />
 
         {/* Buttons */}
-        <ButtonCommon
+        {/* <ButtonCommon
           label="Share Notes"
           icon={<TbUserShare size="20" />}
           className="w-full mt-2"
           variant="outline"
-        />
+        /> */}
 
         <ButtonCommon
           label="Save Changes"
