@@ -7,8 +7,8 @@ import 'react-quill-new/dist/quill.snow.css';
 // Dynamically import ReactQuill with SSR disabled
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
-export default function TextEditor({ onContentChange }) {
-  const [content, setContent] = useState('');
+export default function TextEditor({ onContentChange, initialValue }) {
+  const [content, setContent] = useState(initialValue || "");
 
   const quillModules = {
     toolbar: [

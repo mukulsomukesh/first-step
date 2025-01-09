@@ -9,11 +9,13 @@ import { TbUserShare } from "react-icons/tb";
 import { createNotesService } from "@/app/services/notes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const [editorContent, setEditorContent] = useState(""); // Store the content of the note
   const [title, setTitle] = useState(""); // Store the title of the note
   const [reminderDates, setReminderDates] = useState([]); // Store the upcoming reminders
+  const router = useRouter()
 
   const calculateDefaultDate = (daysInterval) => {
     const now = new Date();
@@ -53,6 +55,7 @@ export default function Page() {
     // Example: You can call an API to save the note here
     try {
       const res = await createNotesService(payload);
+      router.push(`/pages/notes/edit/${res.data._id}`)
       toast.success("Notes successfully created! ")
     } catch (error) {
       console.log(error);
@@ -89,12 +92,12 @@ export default function Page() {
         </div>
 
         {/* Buttons */}
-        <ButtonCommon
+        {/* <ButtonCommon
           label="Share Notes"
           icon={<TbUserShare size="20" />}
           className="w-[100%] mt-2"
           variant="outline"
-        />
+        /> */}
 
         <ButtonCommon
           label="Save Changes"
