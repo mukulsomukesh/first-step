@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import InputCommon from "../commonComponents/InputCommon";
 import ButtonCommon from "../commonComponents/ButtonCommon";
+import { signupService } from "@/app/services/auth";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/navigation";
 
 export default function SignupComponent() {
   const [formData, setFormData] = useState({
@@ -13,6 +17,7 @@ export default function SignupComponent() {
   });
 
   const [error, setError] = useState({});
+  const routes = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,8 +39,21 @@ export default function SignupComponent() {
     setError(errors);
 
     if (Object.keys(errors).length === 0) {
-      alert("Signup Successful!");
+      handelSignupApiRequest(formData);
       // Add your signup logic here
+    }
+  };
+
+  // handel api call
+  const handelSignupApiRequest = async (payload) => {
+    try {
+      const res = await signupService(payload);
+      toast.success("Signup success!");
+      setTimeout(() => {
+        routes.push("/pages/login");
+      }, 1500);
+    } catch (error) {
+      toast.error(error?.message?.response?.data?.data || "Signup Failed!");
     }
   };
 
@@ -44,9 +62,7 @@ export default function SignupComponent() {
       <div className="flex w-full h-screen text-primary-950 ">
         {/* Left Section */}
         <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            Notes Revise App
-          </h1>
+          <h1 className="text-4xl font-bold mb-4">Notes Revise App</h1>
           <p className="text-lg ">
             Organize your notes. <br />
             Revise with ease. <br />
@@ -121,6 +137,8 @@ export default function SignupComponent() {
           </div>
         </div>
       </div>
+
+      <ToastContainer />
     </>
   );
 }

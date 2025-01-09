@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import InputCommon from "../commonComponents/InputCommon";
 import ButtonCommon from "../commonComponents/ButtonCommon";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/navigation";
+import { loginService } from "@/app/services/auth";
 
 export default function LoginComponent() {
   const [formData, setFormData] = useState({
@@ -11,6 +15,7 @@ export default function LoginComponent() {
   });
 
   const [error, setError] = useState({});
+  const routes = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,8 +34,22 @@ export default function LoginComponent() {
     setError(errors);
 
     if (Object.keys(errors).length === 0) {
-      alert("Signup Successful!");
-      // Add your signup logic here
+      handelLoginApiRequest(formData);
+    }
+  };
+
+  // handel api call
+  const handelLoginApiRequest = async (payload) => {
+    try {
+      const res = await loginService(payload);
+      toast.success("Login success!");
+      setTimeout(() => {
+        routes.push("/pages/notes");
+      }, 1500);
+    } catch (error) {
+      console.log(" error ", error)
+      alert(" stipr")
+      toast.error(error?.message?.response?.data?.data || "Login Failed!");
     }
   };
 
@@ -50,11 +69,12 @@ export default function LoginComponent() {
         {/* Right Section */}
         <div className="bg-white w-[65%] h-full flex flex-col justify-center items-center p-8">
           <div className=" rounded-md p-4 lg:w-[50%]">
-            <h2 className="text-2xl font-bold text-primary-950 mb-6 text-center">Login</h2>
+            <h2 className="text-2xl font-bold text-primary-950 mb-6 text-center">
+              Login
+            </h2>
 
             {/* Input Fields */}
             <div className="space-y-4">
-
               <InputCommon
                 label="Email"
                 name="email"
@@ -88,7 +108,10 @@ export default function LoginComponent() {
             <div className="flex justify-between mt-4">
               <p className=" text-primary-950">
                 Don't have account
-                <a href="signup" className="text-primary-950 ml-2 font-semibold">
+                <a
+                  href="signup"
+                  className="text-primary-950 ml-2 font-semibold"
+                >
                   Signup
                 </a>
               </p>
@@ -98,6 +121,8 @@ export default function LoginComponent() {
           </div>
         </div>
       </div>
+
+      <ToastContainer />
     </>
   );
 }
