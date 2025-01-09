@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic'; // Import dynamic
@@ -7,7 +7,7 @@ import 'react-quill-new/dist/quill.snow.css';
 // Dynamically import ReactQuill with SSR disabled
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
-export default function TextEditor() {
+export default function TextEditor({ onContentChange }) {
   const [content, setContent] = useState('');
 
   const quillModules = {
@@ -40,11 +40,9 @@ export default function TextEditor() {
 
   const handleEditorChange = (newContent) => {
     setContent(newContent);
+    onContentChange(newContent); // Update parent with new content
   };
 
-  useEffect(() => {
-    console.log("ok ", content);
-  }, [content]);
 
   return (
     <div className="h-screen flex items-center w-full flex-col">
