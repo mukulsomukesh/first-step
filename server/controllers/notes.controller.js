@@ -3,17 +3,47 @@ const Note = require("../modals/notes.modal"); // Import Note model
 const Reminder = require("../modals/notes.reminder.modal"); // Import Reminder model
 
 // Create a new note
+// Create a new note with reminders
 const createNote = asyncHandler(async (req, res) => {
-  const { title, content, reminderEnabled } = req.body;
+  const { title, content, reminderEnabled, upcomingReminders } = req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user in the request
 
-  const note = await Note.create({ title, content, reminderEnabled, userId });
+  try {
+    // Step 1: Create the note
+    const note = await Note.create({
+      title,
+      content,
+      reminderEnabled,
+      userId,
+    });
 
-  res.status(201).json({
-    success: true,
-    message: "Note created successfully",
-    data: note,
-  });
+    // Step 2: Save reminders if reminderEnabled is true
+    if (reminderEnabled && upcomingReminders && upcomingReminders.length > 0) {
+      // Map through the reminder dates and create reminder documents
+      const remindersData = upcomingReminders.map((reminder) => {
+        return {
+          noteId: note._id, // Link reminder to the created note
+          reminderDate: reminder.reminderDate,
+          reminderTime: reminder.reminderDate.slice(11), // Extract time (HH:mm:ss)
+        };
+      });
+
+      // Create all reminders for this note
+      await Reminder.insertMany(remindersData);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Note created successfully with reminders",
+      data: note,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating note with reminders",
+    });
+  }
 });
 
 // Edit an existing note
@@ -91,7 +121,7 @@ const getNoteById = asyncHandler(async (req, res) => {
 
   let reminder = null;
   if (note.reminderEnabled) {
-    reminder = await Reminder.findOne({ noteId: note._id });
+    reminder = await Reminder.find({ noteId: note._id });
   }
 
   res.status(200).json({
