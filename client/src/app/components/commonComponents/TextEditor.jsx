@@ -1,17 +1,14 @@
 "use client"
 
-"use client"
-
 import React, { useEffect, useState } from 'react';
-import ReactQuill from 'react-quill-new';
+import dynamic from 'next/dynamic'; // Import dynamic
 import 'react-quill-new/dist/quill.snow.css';
 
-
-
+// Dynamically import ReactQuill with SSR disabled
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 export default function TextEditor() {
   const [content, setContent] = useState('');
-
 
   const quillModules = {
     toolbar: [
@@ -25,7 +22,6 @@ export default function TextEditor() {
       ['clean'],
     ],
   };
-
 
   const quillFormats = [
     'header',
@@ -42,27 +38,25 @@ export default function TextEditor() {
     'code-block',
   ];
 
-
   const handleEditorChange = (newContent) => {
     setContent(newContent);
   };
 
-  useEffect(()=>{
-  console.log(" ok ", content)
-  },[content])
-
+  useEffect(() => {
+    console.log("ok ", content);
+  }, [content]);
 
   return (
-      <div className="h-screen flex items-center w-full flex-col">
-        <div className="h-full w-[100%] ">
-          <ReactQuill
-            value={content}
-            onChange={handleEditorChange}
-            modules={quillModules}
-            formats={quillFormats}
-            className="w-full h-full bg-white text-[16px] "
-          />
-        </div>
+    <div className="h-screen flex items-center w-full flex-col">
+      <div className="h-full w-[100%]">
+        <ReactQuill
+          value={content}
+          onChange={handleEditorChange}
+          modules={quillModules}
+          formats={quillFormats}
+          className="w-full h-full bg-white text-[16px]"
+        />
       </div>
+    </div>
   );
 }
