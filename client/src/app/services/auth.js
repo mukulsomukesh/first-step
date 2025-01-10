@@ -22,3 +22,27 @@ export const signupService = (payload) => {
     }
   });
 };
+
+
+export const forgotPasswordService = (payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let response = await axiosInstance.post(`/api/auth/forgot-password`, payload);
+      resolve(response);
+    } catch (error) {
+      reject({ message: error });
+    }
+  });
+};
+
+
+export const resetPasswordService  = (payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let response = await axiosInstance.post(`/api/auth/update-password`, payload);
+      resolve(response);
+    } catch (error) {
+      reject({ message: error });
+    }
+  });
+};

@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 import { loginService } from "@/app/services/auth";
+import ForgotPasswordModal from "../modals/ForgotPasswordModal";
 
 export default function LoginComponent() {
   const [formData, setFormData] = useState({
@@ -47,8 +48,8 @@ export default function LoginComponent() {
         routes.push("/pages/notes");
       }, 1500);
     } catch (error) {
-      console.log(" error ", error)
-      alert(" stipr")
+      console.log(" error ", error);
+      alert(" stipr");
       toast.error(error?.message?.response?.data?.data || "Login Failed!");
     }
   };
@@ -115,8 +116,8 @@ export default function LoginComponent() {
                   Signup
                 </a>
               </p>
-
-              <p className="font-bold">Forgot Password</p>
+              <ForgotPasswordModal />
+              {/* <p className="font-bold">Forgot Password</p> */}
             </div>
           </div>
         </div>

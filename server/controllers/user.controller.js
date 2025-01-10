@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const userModal = require("../modals/user.modal");
 const jwt = require("jsonwebtoken");
+const { sendEmail } = require("../helperFunctions/sendEmail");
 
 // Helper to create JWT
 const createToken = (user) => {
@@ -54,4 +55,70 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { registerUser, loginUser };
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  // Check if user exists
+  const user = await userModal.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  // Generate unique OTP
+  let otp = generateUniqueOTP();
+  // Ensure the OTP is unique in the database
+  while (await userModal.findOne({ otp })) {
+    otp = generateUniqueOTP();
+  }
+
+  // Save OTP to user's record with a timestamp
+  user.otp = otp;
+  user.otpExpiresAt = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+  await user.save();
+
+  // Send OTP to user's email
+  const subject = "Password Reset OTP";
+  const htmlContent = `
+    <h1>Password Reset Request</h1>
+    <p>Your OTP for resetting your password is: <strong>${otp}</strong></p>
+    <p> reset password like </p> <a href="${process.env.FRONTEND_URL}/pages/update-password?otp=${otp}"> click here </a>
+  `;
+  await sendEmail({ recipient: email, subject, htmlContent });
+
+  res.status(200).json({
+    success: true,
+    message: "OTP sent to your email",
+  });
+});
+
+const setNewPassword = asyncHandler(async (req, res) => {
+  const { otp, newPassword } = req.body;
+
+  // Find user by OTP and ensure OTP is not expired
+  const user = await userModal.findOne({
+    otp,
+  });
+
+  if (!user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid or expired OTP" });
+  }
+
+  // Set new password
+  user.password = newPassword;
+  user.otp = undefined; // Clear OTP
+  user.otpExpiresAt = undefined; // Clear OTP expiry time
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Password reset successfully",
+  });
+});
+
+const generateUniqueOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit OTP
+};
+
+module.exports = { registerUser, loginUser, forgotPassword, setNewPassword };

@@ -46,6 +46,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    otp:{
+      type:Number,
+      required:false,
+      unique:true
+  },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically
