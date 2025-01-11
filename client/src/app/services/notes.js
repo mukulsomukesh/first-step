@@ -62,3 +62,15 @@ export const userNotesListService = (payload) => {
     });
   };
   
+  // dashboard today and pending revition list of user notes
+  export const dashboardRevisionListService = (id) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let response = await axiosInstance.get(`/api/notes/dashboard/reminders`);
+        resolve(response);
+      } catch (error) {
+        reject({ message: error });
+      }
+    });
+  };
+  

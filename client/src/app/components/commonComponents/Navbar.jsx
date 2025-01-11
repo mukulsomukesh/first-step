@@ -61,8 +61,8 @@ const Navbar = () => {
       <div className="flex justify-center items-center gap-4">
         {isLoggedIn ? (
           <>
-            <FaSearch size="20" />
-            <IoNotifications size="22" />
+            {/* <FaSearch size="20" />
+            <IoNotifications size="22" /> */}
             <ProfileDropdown />
           </>
         ) : (

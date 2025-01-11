@@ -88,7 +88,7 @@ export default function NoteViewerPage() {
         {/* Back Button */}
         <ButtonCommon
           label="Edit Note"
-          onClick={() => router.push("/pages/notes/edit/${noteId}")}
+          onClick={() => router.push(`/pages/notes/edit/${noteId}`)}
           variant="outline"
           className="w-[100%] mt-4"
           icon={<FaRegEdit />}
