@@ -49,8 +49,11 @@ const ProfileDropdown = () => {
 
   return (
     <div className="relative text-primary-950 profile-dropdown">
+      {isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-10" onClick={() => setIsOpen(false)}></div>
+      )}
       <button
-        className="flex items-center space-x-2"
+        className="flex items-center space-x-2 z-20 relative bg-primary-50 rounded-md p-2"
         onClick={() => setIsOpen(!isOpen)}
       >
         {userDetails?.name && (
@@ -62,14 +65,14 @@ const ProfileDropdown = () => {
           <img
             src={userDetails.profilePicture}
             alt="User Profile"
-            className="w-10 h-10 rounded-full border-2 border-primary-600"
+            className="w-12 h-12 rounded-full border-2 border-primary-600"
           />
         ) : (
           <FaUserCircle className="text-primary-950 text-4xl" />
         )}
       </button>
       {isOpen && (
-        <ul className="absolute min-w-[200px] right-0 mt-2 bg-primary-50 shadow-xl border-2 border-primary-600 border-t rounded-md overflow-hidden">
+        <ul className="absolute min-w-[200px] right-0 mt-2 bg-primary-50 shadow-xl border-2 border-primary-600 border-t rounded-md overflow-hidden z-20">
           {/* Menu items */}
           <li
             onClick={() => handleNavigation("/pages/profile")}
