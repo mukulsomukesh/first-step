@@ -37,7 +37,7 @@ const Page = () => {
   const { notesForRevisionToday, pastNotesForRevision } = revisionNotes;
 
   const renderNoteCard = (note) => (
-    <div className="bg-white shadow rounded-lg p-4 mb-4 border border-neutral-200 flex justify-between items-start">
+    <div className="bg-white shadow rounded-lg p-4 mb-4 border border-neutral-200 flex flex-col sm:flex-row justify-between items-start sm:items-center">
       <div className="flex-1">
         <h3 className="text-lg font-medium text-neutral-800">{note.noteTitle}</h3>
         <p className="text-sm text-neutral-500 mt-2 flex items-center">
@@ -58,9 +58,10 @@ const Page = () => {
         onClick={() => handleReviseNow(note.otherDetails.noteId)}
         label="Revise Now"
         icon={<FaBookReader />}
-        className="ml-4"
+        className="mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto"
       />
     </div>
+    
   );
 
   if (loading) {

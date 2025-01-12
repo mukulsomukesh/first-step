@@ -64,20 +64,20 @@ export default function ResetPasswordPage() {
 
   return (
     <>
-      <div className="flex w-full h-screen text-primary-950 ">
-        {/* Left Section */}
-        <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
+      <div className="flex justify-center items-center w-full h-[90vh] text-primary-600 ">
+      {/* Left Section */}
+        {/* <div className="bg-primary-200 flex flex-col justify-center items-center w-full lg:w-[35%] h-[40%] lg:h-full p-8 text-center">
           <h1 className="text-4xl font-bold mb-4">Notes Revise App</h1>
-          <p className="text-lg ">
+          <p className="text-lg">
             Organize your notes. <br />
             Revise with ease. <br />
             Excel in every exam!
           </p>
-        </div>
+        </div> */}
 
         {/* Right Section */}
-        <div className="bg-white w-[65%] h-full flex flex-col justify-center items-center p-8">
-          <div className="rounded-md p-4 lg:w-[50%]">
+        <div className="bg-white w-full h-[60%] lg:h-full flex flex-col justify-center items-center p-8">
+          <div className="rounded-md p-4 w-full max-w-[500px]">
             <h2 className="text-2xl font-bold text-primary-950 mb-6 text-center">
               Reset Password
             </h2>

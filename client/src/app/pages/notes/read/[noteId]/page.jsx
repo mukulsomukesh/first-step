@@ -126,9 +126,9 @@ export default function NoteViewerPage() {
   );
 
   return (
-    <div className="flex mt-12 gap-4 px-8">
+    <div className="flex flex-col md:flex-row mt-8 gap-4 px-4 md:px-8">
       {/* Note Viewer Section */}
-      <div className="w-[80%]">
+      <div className="w-full md:w-[80%] space-y-3 ">
         {noteData ? (
           <div className="space-y-3">
             {/* Title */}
@@ -146,7 +146,7 @@ export default function NoteViewerPage() {
       </div>
 
       {/* Sidebar Section */}
-      <div className="w-[20%] bg-primary-50 h-fit p-2 rounded-md ">
+      <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         {/* Reminders */}
         {noteData && <ReminderList />}
 

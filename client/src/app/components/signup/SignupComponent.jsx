@@ -59,26 +59,26 @@ export default function SignupComponent() {
 
   return (
     <>
-      <div className="flex w-full h-screen text-primary-950 ">
+      <div className="flex w-full h-screen text-primary-600 ">
         {/* Left Section */}
-        <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
+        {/* <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
           <h1 className="text-4xl font-bold mb-4">Notes Revise App</h1>
           <p className="text-lg ">
             Organize your notes. <br />
             Revise with ease. <br />
             Excel in every exam!
           </p>
-        </div>
+        </div> */}
 
         {/* Right Section */}
-        <div className="bg-white w-[65%] h-full flex flex-col justify-center items-center p-8">
-          <div className=" rounded-md p-4 lg:w-[50%]">
+        <div className="bg-white  mx-auto w-[100%] h-full flex flex-col justify-center items-center p-8">
+          <div className=" rounded-md p-4 w-[100%] max-w-[500px] ">
             <h2 className="text-2xl font-bold text-primary-950 mb-6 text-center">
               Sign Up
             </h2>
 
             {/* Input Fields */}
-            <div className="space-y-4">
+            <div className="space-y-4 ">
               <InputCommon
                 label="Name"
                 name="name"

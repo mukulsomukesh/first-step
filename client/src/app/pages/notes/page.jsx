@@ -26,7 +26,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="px-8 py-4">
+    <div className="px-8 py-4 mt-6">
       <ButtonCommon
         label="Create New Note"
         variant="solid"
