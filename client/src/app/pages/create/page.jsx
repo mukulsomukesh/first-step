@@ -10,6 +10,7 @@ import { createNotesService } from "@/app/services/notes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
+import { MdDelete } from "react-icons/md";
 
 export default function Page() {
   const [editorContent, setEditorContent] = useState(""); // Store the content of the note
@@ -82,9 +83,9 @@ export default function Page() {
   };
 
   return (
-    <div className="flex mt-4 gap-4 px-8">
-      <div className="w-[80%] space-y-2">
-        {/* Title Input */}
+    <div className="flex flex-col md:flex-row mt-8 gap-4 px-4 md:px-8">
+      <div className="w-full md:w-[80%] space-y-3 ">
+      {/* Title Input */}
         <InputCommon
           placeholder="Notes Title"
           type="text"
@@ -95,7 +96,7 @@ export default function Page() {
         <TextEditor onContentChange={setEditorContent} />
       </div>
 
-      <div className="w-[20%] bg-primary-50 h-fit p-2 rounded-md">
+      <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         <div className="mt-4 flex flex-col gap-1">
           <label className="flex items-center">
             <input
@@ -113,12 +114,9 @@ export default function Page() {
                 value={date} // Bind the date to the state
                 onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
               />
-              <button
-                onClick={() => handleRemoveReminder(index)}
-                className="text-red-500"
-              >
-                Remove
-              </button>
+                 <p className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 " onClick={() => handleRemoveReminder(index)}>
+              <MdDelete size={30} className="text-red-600" />
+            </p>
             </div>
           ))}
           {remindersEnabled && (

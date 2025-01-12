@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation"; // Importing Next.js nav
 import { VscSaveAll } from "react-icons/vsc";
 import { TbUserShare } from "react-icons/tb";
 import { MdOutlineDelete } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 
 import ButtonCommon from "@/app/components/commonComponents/ButtonCommon";
 import InputCommon from "@/app/components/commonComponents/InputCommon";
@@ -113,7 +114,7 @@ export default function NoteEditorPage() {
 
   // Component for Reminders
   const ReminderList = () => (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1  ">
       <label className="flex items-center">
         <input
           type="checkbox"
@@ -126,18 +127,15 @@ export default function NoteEditorPage() {
       {remindersEnabled && editedReminders
         .filter((reminder) => !reminder.isDelivered) // Show only undelivered reminders
         .map((reminder, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div key={index} className="flex items-center gap-2 ">
             <InputCommon
               type="datetime-local"
               value={formatReminderDate(reminder.reminderDate)}
               onChange={(e) => handleReminderChange(index, e.target.value)}
             />
-            <button
-              onClick={() => handleRemoveReminder(index)}
-              className="text-red-500"
-            >
-              Remove
-            </button>
+            <p className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 " onClick={() => handleRemoveReminder(index)}>
+              <MdDelete size={30} className="text-red-600" />
+            </p>
           </div>
         ))}
       {remindersEnabled && (
@@ -164,11 +162,11 @@ export default function NoteEditorPage() {
   };
 
   return (
-    <div className="flex mt-4 gap-4 px-8">
+    <div className="flex flex-col md:flex-row mt-8 gap-4 px-4 md:px-8">
       {/* Note Editor Section */}
-      <div className="w-[80%]">
+      <div className="w-full md:w-[80%]">
         {noteData ? (
-          <div className="space-y-3">
+          <div className="space-y-3 ">
             {/* Title Input */}
             <InputCommon
               placeholder="Enter Note Title"
@@ -192,7 +190,7 @@ export default function NoteEditorPage() {
       </div>
 
       {/* Sidebar Section */}
-      <div className="w-[20%] bg-primary-50 h-fit p-2 rounded-md">
+      <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         {/* Reminders */}
         <ReminderList />
 
