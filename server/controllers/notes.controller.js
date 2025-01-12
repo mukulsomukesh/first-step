@@ -180,7 +180,6 @@ const getNotesByReminderStatus = asyncHandler(async (req, res) => {
     const notesToReviseToday = await Reminder.find({
       noteId: { $in: await Note.find({ userId }).select('_id') },
       reminderDate: { $gte: startOfToday, $lt: endOfToday }, // Reminder date is today
-      isRevisionDone: false, // Revision not done yet
     })
       .populate('noteId') // Populate the note details
       .exec();
@@ -237,8 +236,29 @@ const getNotesByReminderStatus = asyncHandler(async (req, res) => {
   }
 });
 
+// Mark a note as revised
+const markNoteAsRevised = asyncHandler(async (req, res) => {
+  const { id } = req.params; // Note ID
+  const userId = req.user._id; // Access the user ID from the authenticated user
 
+  const reminder = await Reminder.findOneAndUpdate(
+    { noteId: id, reminderDate: { $gte: new Date().setHours(0, 0, 0, 0), $lt: new Date().setHours(23, 59, 59, 999) }, isRevisionDone: false },
+    { isRevisionDone: true },
+    { new: true }
+  );
 
+  if (!reminder) {
+    return res.status(404).json({
+      success: false,
+      message: "No pending reminder found for today or unauthorized access",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Note marked as revised successfully",
+  });
+});
 
 module.exports = {
   getNoteById,
@@ -246,5 +266,6 @@ module.exports = {
   editNote,
   deleteNote,
   getAllNotesByUserId,
-  getNotesByReminderStatus
+  getNotesByReminderStatus,
+  markNoteAsRevised,
 };

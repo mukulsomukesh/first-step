@@ -73,4 +73,15 @@ export const userNotesListService = (payload) => {
       }
     });
   };
-  
+
+  // Mark note as revised
+  export const markNoteAsRevisedService = (id) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let response = await axiosInstance.put(`/api/notes/mark-revised/${id}`);
+        resolve(response);
+      } catch (error) {
+        reject({ message: error });
+      }
+    });
+  };
