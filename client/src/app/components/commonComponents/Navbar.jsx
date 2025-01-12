@@ -40,7 +40,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className="bg-primary-50 w-[100%] fixed shadow flex justify-between items-center p-3 px-6"
+      className="bg-primary-50 w-[100%] fixed shadow flex justify-between items-center p-2 px-6"
       style={{ zIndex: "9999" }}
     >
       {/* Logo */}
@@ -61,8 +61,8 @@ const Navbar = () => {
       <div className="flex justify-center items-center gap-4">
         {isLoggedIn ? (
           <>
-            <FaSearch size="20" />
-            <IoNotifications size="22" />
+            {/* <FaSearch size="20" />
+            <IoNotifications size="22" /> */}
             <ProfileDropdown />
           </>
         ) : (

@@ -27,6 +27,7 @@ export default function NoteEditorPage() {
   const [noteData, setNoteData] = useState(null); // Note data fetched from the backend
   const [editedContent, setEditedContent] = useState(""); // Note content being edited
   const [editedReminders, setEditedReminders] = useState([]); // Reminder list being edited
+  const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
 
   // Fetch Note Data
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function NoteEditorPage() {
         setEditedTitle(data.note.title);
         setEditedContent(data.note.content);
         setEditedReminders(data.reminder || []);
+        setRemindersEnabled(data.note.reminderEnabled);
       } catch (error) {
         console.error("Failed to fetch note data:", error);
       }
@@ -49,6 +51,11 @@ export default function NoteEditorPage() {
 
     fetchNoteData();
   }, [noteId]);
+
+  // Handle checkbox change
+  const handleRemindersEnabledChange = (e) => {
+    setRemindersEnabled(e.target.checked);
+  };
 
   // Handle Save Changes
   const handleSaveChanges = async () => {
@@ -60,9 +67,12 @@ export default function NoteEditorPage() {
     };
 
     const payload = {
-      reminderEnabled: true,
+      reminderEnabled: remindersEnabled && editedReminders.length > 0, // Enable reminder if checkbox is checked and there are reminders
       content: editedContent,
       title: editedTitle,
+      upcomingReminders: remindersEnabled ? editedReminders.map((reminder) => ({
+        reminderDate: reminder.reminderDate,
+      })) : [], // Pass the upcoming reminders array if enabled
     };
 
     try {
@@ -71,7 +81,7 @@ export default function NoteEditorPage() {
       toast.success("Note successfully updated");
     } catch (error) {
       console.error("Error saving note changes:", error);
-      toast.error("Failed to updated the note")
+      toast.error("Failed to update the note");
     }
   };
 
@@ -79,6 +89,17 @@ export default function NoteEditorPage() {
   const handleReminderChange = (index, value) => {
     const updatedReminders = [...editedReminders];
     updatedReminders[index].reminderDate = new Date(value).toISOString();
+    setEditedReminders(updatedReminders);
+  };
+
+  // Add a new reminder
+  const handleAddReminder = () => {
+    setEditedReminders([...editedReminders, { reminderDate: new Date().toISOString() }]);
+  };
+
+  // Handle removing a reminder
+  const handleRemoveReminder = (index) => {
+    const updatedReminders = editedReminders.filter((_, i) => i !== index);
     setEditedReminders(updatedReminders);
   };
 
@@ -93,17 +114,39 @@ export default function NoteEditorPage() {
   // Component for Reminders
   const ReminderList = () => (
     <div className="flex flex-col gap-1">
-      <p className="text-[18px] font-semibold">Upcoming Reminders</p>
-      {editedReminders
+      <label className="flex items-center">
+        <input
+          type="checkbox"
+          checked={remindersEnabled}
+          onChange={handleRemindersEnabledChange}
+          className="mr-2"
+        />
+        Enable Reminders
+      </label>
+      {remindersEnabled && editedReminders
         .filter((reminder) => !reminder.isDelivered) // Show only undelivered reminders
         .map((reminder, index) => (
-          <InputCommon
-            key={reminder._id}
-            type="datetime-local"
-            value={formatReminderDate(reminder.reminderDate)}
-            onChange={(e) => handleReminderChange(index, e.target.value)}
-          />
+          <div key={index} className="flex items-center gap-2">
+            <InputCommon
+              type="datetime-local"
+              value={formatReminderDate(reminder.reminderDate)}
+              onChange={(e) => handleReminderChange(index, e.target.value)}
+            />
+            <button
+              onClick={() => handleRemoveReminder(index)}
+              className="text-red-500"
+            >
+              Remove
+            </button>
+          </div>
         ))}
+      {remindersEnabled && (
+        <ButtonCommon
+          label="Add Reminder"
+          className="mt-2"
+          onClick={handleAddReminder}
+        />
+      )}
     </div>
   );
 
@@ -140,7 +183,7 @@ export default function NoteEditorPage() {
             {/* Text Editor */}
             <TextEditor
               initialValue={editedContent}
-              onContentChange ={(newContent) => setEditedContent(newContent)}
+              onContentChange={(newContent) => setEditedContent(newContent)}
             />
           </div>
         ) : (

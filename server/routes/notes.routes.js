@@ -4,7 +4,9 @@ const {
   editNote,
   deleteNote,
   getAllNotesByUserId,
-  getNoteById
+  getNoteById,
+  getNotesByReminderStatus,
+  markNoteAsRevised
 } = require("../controllers/notes.controller");
 const authMiddleware = require("../middleware/auth.middleware");
 
@@ -24,5 +26,11 @@ router.get("/list", authMiddleware, getAllNotesByUserId);
 
 // Get note rich text
 router.get("/:id", authMiddleware, getNoteById);
+
+// dashboard api to get notes by reminder status
+router.get("/dashboard/reminders", authMiddleware, getNotesByReminderStatus);
+
+// Mark a note as revised
+router.put("/mark-revised/:id", authMiddleware, markNoteAsRevised);
 
 module.exports = router;
