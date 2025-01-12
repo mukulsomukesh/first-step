@@ -15,6 +15,7 @@ export default function Page() {
   const [editorContent, setEditorContent] = useState(""); // Store the content of the note
   const [title, setTitle] = useState(""); // Store the title of the note
   const [reminderDates, setReminderDates] = useState([]); // Store the upcoming reminders
+  const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
   const router = useRouter()
 
   const calculateDefaultDate = (daysInterval) => {
@@ -39,15 +40,31 @@ export default function Page() {
     setReminderDates(updatedReminderDates);
   };
 
+  // Handle checkbox change
+  const handleRemindersEnabledChange = (e) => {
+    setRemindersEnabled(e.target.checked);
+  };
+
+  // Handle removing a reminder
+  const handleRemoveReminder = (index) => {
+    const updatedReminderDates = reminderDates.filter((_, i) => i !== index);
+    setReminderDates(updatedReminderDates);
+  };
+
+  // Handle adding a new reminder
+  const handleAddReminder = () => {
+    setReminderDates([...reminderDates, calculateDefaultDate(1)]);
+  };
+
   // Build the payload when the save button is clicked
   const handleSave = async () => {
     const payload = {
       title: title || "Sample Note", // Default title if not provided
       content: editorContent, // The content of the note
-      reminderEnabled: reminderDates.length > 0, // Enable reminder if there are reminders
-      upcomingReminders: reminderDates.map((reminder) => ({
+      reminderEnabled: remindersEnabled && reminderDates.length > 0, // Enable reminder if checkbox is checked and there are reminders
+      upcomingReminders: remindersEnabled ? reminderDates.map((reminder) => ({
         reminderDate: reminder,
-      })), // Pass the upcoming reminders array
+      })) : [], // Pass the upcoming reminders array if enabled
     };
 
     console.log("Payload to be sent:", payload);
@@ -80,15 +97,37 @@ export default function Page() {
 
       <div className="w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         <div className="mt-4 flex flex-col gap-1">
-          <p className="text-[18px] font-semibold">Upcoming Reminders</p>
-          {reminderDates.map((date, index) => (
-            <InputCommon
-              key={index}
-              type="datetime-local"
-              value={date} // Bind the date to the state
-              onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={remindersEnabled}
+              onChange={handleRemindersEnabledChange}
+              className="mr-2"
             />
+            Enable Reminders
+          </label>
+          {remindersEnabled && reminderDates.map((date, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <InputCommon
+                type="datetime-local"
+                value={date} // Bind the date to the state
+                onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
+              />
+              <button
+                onClick={() => handleRemoveReminder(index)}
+                className="text-red-500"
+              >
+                Remove
+              </button>
+            </div>
           ))}
+          {remindersEnabled && (
+            <ButtonCommon
+              label="Add Reminder"
+              className="mt-2"
+              onClick={handleAddReminder}
+            />
+          )}
         </div>
 
         {/* Buttons */}

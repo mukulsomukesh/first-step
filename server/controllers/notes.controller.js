@@ -47,10 +47,10 @@ const createNote = asyncHandler(async (req, res) => {
   }
 });
 
-// Edit an existing note
+// Edit an existing note with reminder changes
 const editNote = asyncHandler(async (req, res) => {
   const { id } = req.params; // Note ID
-  const { title, content, reminderEnabled, status } = req.body;
+  const { title, content, reminderEnabled, status, upcomingReminders } = req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user
 
   const updatedNote = await Note.findOneAndUpdate(
@@ -66,9 +66,30 @@ const editNote = asyncHandler(async (req, res) => {
     });
   }
 
+  // Handle reminder updates
+  if (reminderEnabled && upcomingReminders && upcomingReminders.length > 0) {
+    // Remove existing reminders for the note
+    await Reminder.deleteMany({ noteId: id });
+
+    // Map through the reminder dates and create new reminder documents
+    const remindersData = upcomingReminders.map((reminder) => {
+      return {
+        noteId: id, // Link reminder to the updated note
+        reminderDate: reminder.reminderDate,
+        reminderTime: reminder.reminderDate.slice(11), // Extract time (HH:mm:ss)
+      };
+    });
+
+    // Create all new reminders for this note
+    await Reminder.insertMany(remindersData);
+  } else {
+    // If reminders are not enabled, remove existing reminders
+    await Reminder.deleteMany({ noteId: id });
+  }
+
   res.status(200).json({
     success: true,
-    message: "Note updated successfully",
+    message: "Note and reminders updated successfully",
     data: updatedNote,
   });
 });
