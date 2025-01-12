@@ -40,7 +40,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className="bg-primary-50 w-[100%] fixed shadow flex justify-between items-center p-1 px-6"
+      className="bg-primary-50 w-[100%] fixed shadow flex justify-between items-center p-2 px-6"
       style={{ zIndex: "9999" }}
     >
       {/* Logo */}

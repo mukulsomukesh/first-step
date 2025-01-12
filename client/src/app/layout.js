@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
             <Navbar />
-            <main className="mt-16 p-4 min-h-[95vh] ">{children}</main>
+            <main className="mt-16 min-h-[95vh] ">{children}</main>
 
             <Footer />
           </div>
