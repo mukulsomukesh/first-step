@@ -4,12 +4,14 @@ import React, { useEffect, useState } from "react";
 import ButtonCommon from "@/app/components/commonComponents/ButtonCommon";
 import { FaClock, FaCheckCircle, FaTimesCircle, FaBookReader } from "react-icons/fa";
 import { dashboardRevisionListService } from "@/app/services/notes";
+import Loading from "../loading";
 
 const Page = () => {
   const [revisionNotes, setRevisionNotes] = useState({
     notesForRevisionToday: [],
     pastNotesForRevision: [],
   });
+  const [loading, setLoading] = useState(true);
 
   const fetchRevisionNotes = async () => {
     try {
@@ -19,6 +21,8 @@ const Page = () => {
       }
     } catch (error) {
       console.error("Error fetching revision notes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,11 +63,14 @@ const Page = () => {
     </div>
   );
 
-  return (
-    <div className=" min-h-screen p-6">
+  if (loading) {
+    return <Loading />; // Display loader while data is loading
+  }
 
+  return (
+    <div className="min-h-screen p-6 mt-4 bg-gray-100">
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-primary-600 mb-4">Today's Notes</h2>
+        <h2 className="text-2xl font-semibold text-primary-600 mb-4">Today's Notes</h2>
         {notesForRevisionToday.length > 0 ? (
           notesForRevisionToday.map((note, index) => (
             <React.Fragment key={index}>{renderNoteCard(note)}</React.Fragment>
@@ -74,7 +81,7 @@ const Page = () => {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-primary-600 mb-4">Past Notes</h2>
+        <h2 className="text-2xl font-semibold text-primary-600 mb-4">Past Notes</h2>
         {pastNotesForRevision.length > 0 ? (
           pastNotesForRevision.map((note, index) => (
             <React.Fragment key={index}>{renderNoteCard(note)}</React.Fragment>
