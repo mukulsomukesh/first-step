@@ -28,7 +28,7 @@ const ButtonCommon = ({
       {isLoading ? (
         <span className="flex items-center justify-center">
           <span className="spinner-border mr-2" />
-          Loading...
+          Please Wait...
         </span>
       ) : (
         <strong className="flex items-center justify-center">

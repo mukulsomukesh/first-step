@@ -5,6 +5,7 @@ import ButtonCommon from "@/app/components/commonComponents/ButtonCommon";
 import { FaClock, FaCheckCircle, FaTimesCircle, FaBookReader } from "react-icons/fa";
 import { dashboardRevisionListService } from "@/app/services/notes";
 import Loading from "../loading";
+import { toast } from "react-toastify"; // Import toast
 
 const Page = () => {
   const [revisionNotes, setRevisionNotes] = useState({
@@ -12,17 +13,24 @@ const Page = () => {
     pastNotesForRevision: [],
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Add error state
 
   const fetchRevisionNotes = async () => {
+    setLoading(true); // Set loading to true when starting the API call
+    setError(null); // Reset error state
     try {
       const response = await dashboardRevisionListService();
       if (response.success) {
         setRevisionNotes(response.data);
+      } else {
+        throw new Error("Failed to fetch revision notes");
       }
     } catch (error) {
       console.error("Error fetching revision notes:", error);
+      setError("Failed to fetch revision notes. Please try again later.");
+      toast.error("Failed to fetch revision notes. Please try again later."); // Display error toast
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false when API call is complete
     }
   };
 
@@ -61,7 +69,6 @@ const Page = () => {
         className="mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto"
       />
     </div>
-    
   );
 
   if (loading) {
@@ -70,6 +77,7 @@ const Page = () => {
 
   return (
     <div className="min-h-screen p-6 mt-4 bg-gray-100">
+      {error && <p className="text-sm text-red-500 mb-4">{error}</p>} {/* Display error message */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-primary-600 mb-4">Today's Notes</h2>
         {notesForRevisionToday.length > 0 ? (

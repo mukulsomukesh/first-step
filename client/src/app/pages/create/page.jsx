@@ -17,7 +17,8 @@ export default function Page() {
   const [title, setTitle] = useState(""); // Store the title of the note
   const [reminderDates, setReminderDates] = useState([]); // Store the upcoming reminders
   const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false); // State to manage loading
+  const router = useRouter();
 
   const calculateDefaultDate = (daysInterval) => {
     const now = new Date();
@@ -59,13 +60,16 @@ export default function Page() {
 
   // Build the payload when the save button is clicked
   const handleSave = async () => {
+    setIsLoading(true); // Set loading to true
     const payload = {
       title: title || "Sample Note", // Default title if not provided
       content: editorContent, // The content of the note
       reminderEnabled: remindersEnabled && reminderDates.length > 0, // Enable reminder if checkbox is checked and there are reminders
-      upcomingReminders: remindersEnabled ? reminderDates.map((reminder) => ({
-        reminderDate: reminder,
-      })) : [], // Pass the upcoming reminders array if enabled
+      upcomingReminders: remindersEnabled
+        ? reminderDates.map((reminder) => ({
+            reminderDate: reminder,
+          }))
+        : [], // Pass the upcoming reminders array if enabled
     };
 
     console.log("Payload to be sent:", payload);
@@ -73,19 +77,22 @@ export default function Page() {
     // Example: You can call an API to save the note here
     try {
       const res = await createNotesService(payload);
-      router.push(`/pages/notes/edit/${res.data._id}`)
-      toast.success("Notes successfully created! ")
+      router.push(`/pages/notes/edit/${res.data._id}`);
+      toast.success("Notes successfully created!");
     } catch (error) {
       console.log(error);
-      toast.error(error?.message?.response?.data?.data || "Notes creation failed ")
-
+      toast.error(
+        error?.message?.response?.data?.data || "Notes creation failed"
+      );
+    } finally {
+      setIsLoading(false); // Set loading to false
     }
   };
 
   return (
     <div className="flex flex-col md:flex-row mt-8 gap-4 px-4 md:px-8">
       <div className="w-full md:w-[80%] space-y-3 ">
-      {/* Title Input */}
+        {/* Title Input */}
         <InputCommon
           placeholder="Notes Title"
           type="text"
@@ -107,18 +114,22 @@ export default function Page() {
             />
             Enable Reminders
           </label>
-          {remindersEnabled && reminderDates.map((date, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <InputCommon
-                type="datetime-local"
-                value={date} // Bind the date to the state
-                onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
-              />
-                 <p className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 " onClick={() => handleRemoveReminder(index)}>
-              <MdDelete size={30} className="text-red-600" />
-            </p>
-            </div>
-          ))}
+          {remindersEnabled &&
+            reminderDates.map((date, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <InputCommon
+                  type="datetime-local"
+                  value={date} // Bind the date to the state
+                  onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
+                />
+                <p
+                  className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 "
+                  onClick={() => handleRemoveReminder(index)}
+                >
+                  <MdDelete size={30} className="text-red-600" />
+                </p>
+              </div>
+            ))}
           {remindersEnabled && (
             <ButtonCommon
               label="Add Reminder"
@@ -141,6 +152,8 @@ export default function Page() {
           icon={<VscSaveAll size="20" />}
           className="w-[100%] mt-2"
           onClick={handleSave} // Attach save function to button
+          disabled={isLoading} // Disable button while loading
+          isLoading={isLoading}
         />
       </div>
 
