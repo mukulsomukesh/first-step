@@ -10,7 +10,7 @@ const InputCommon = ({
   error 
 }) => {
   return (
-    <div className="input-wrapper">
+    <div className="">
       {label && <label className='block text-[16px] font-semibold '   htmlFor={name}>{label}</label>}
       <input 
         id={name} 
