@@ -14,7 +14,9 @@ const ButtonCommon = ({
     solid: 'bg-primary-400 text-white border-primary-400 hover:bg-white hover:text-primary-400',
     outline: 'hover:bg-primary-400 hover:text-white border-primary-400 bg-white text-primary-400',
     danger: 'bg-red-500 text-white border-red-500 hover:bg-white hover:text-red-500',
-    success: 'bg-green-500 text-white border-green-500 hover:bg-white hover:text-green-500',
+    success: 'bg-green-600 text-white border-green-600 hover:bg-white hover:text-green-600',
+    highlight: 'bg-yellow-500 text-white border-yellow-500 hover:bg-white hover:text-yellow-500',
+    
   };
 
   return (
