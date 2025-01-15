@@ -130,14 +130,16 @@ export default function TodoList() {
 
   return (
     <div className="px-4 sm:px-8 flex flex-col items-center min-h-[90vh] justify-start h-screen mt-6 w-[100%] mx-auto">
-      <div className="w-[100%] flex flex-wrap gap-4 max-w-[800px] mx-auto items-center">
+      <div className="w-[100%] flex flex-wrap gap-4 max-w-[700px] mx-auto items-end mt-6">
         <InputCommon
+        label={"Write Todo"}
           placeholder="Write Todo"
           value={todo}
           onChange={(e) => setTodo(e.target.value)}
           className="flex-1 min-w-[150px]"
         />
         <SelectCommon
+        label={"Priority"}
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
           options={[
@@ -148,6 +150,7 @@ export default function TodoList() {
           className="flex-1 min-w-[150px]"
         />
         <InputCommon
+        label={"Due Date"}
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
