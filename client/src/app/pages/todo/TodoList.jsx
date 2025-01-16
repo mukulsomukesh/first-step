@@ -42,6 +42,8 @@ export default function TodoList() {
     priority: "all", // Filter for priority (all, high, medium, low)
     dueDate: "", // Filter for due date
   });
+  const [isFetching, setIsFetching] = useState(false); // For tracking fetch status
+  const [isAdding, setIsAdding] = useState(false); // For tracking add/update status
 
   const resetForm = () => {
     setTodo("");
@@ -57,11 +59,14 @@ export default function TodoList() {
   }, [filters]); // Re-fetch todos when filters change
 
   const fetchTodos = async () => {
+    setIsFetching(true);
     try {
       const response = await listTodoService(filters); // Pass filters to service
       setTodos(response);
     } catch (error) {
       console.error("Error fetching todos:", error.message);
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -72,6 +77,7 @@ export default function TodoList() {
     }
 
     const payload = { task: todo, priority, endDate, status: "pending" };
+    setIsAdding(true);
 
     try {
       if (editId) {
@@ -85,6 +91,8 @@ export default function TodoList() {
       fetchTodos();
     } catch (error) {
       console.error("Error saving todo:", error.message);
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -120,26 +128,29 @@ export default function TodoList() {
     }
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }));
-  };
+  // const handleFilterChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFilters((prevFilters) => ({
+  //     ...prevFilters,
+  //     [name]: value,
+  //   }));
+  // };
 
+  
   return (
     <div className="px-4 sm:px-8 flex flex-col items-center min-h-[90vh] justify-start h-screen mt-6 w-[100%] mx-auto">
-      <div className="w-[100%] flex flex-wrap gap-4 max-w-[700px] mx-auto items-end mt-6">
+      <div className="w-[100%] flex flex-wrap gap-4 max-w-[900px] mx-auto items-end mt-6">
+      <div className="lg:w-[450px]" >
         <InputCommon
-        label={"Write Todo"}
+          label={"Write Todo"}
           placeholder="Write Todo"
           value={todo}
           onChange={(e) => setTodo(e.target.value)}
           className="flex-1 min-w-[150px]"
         />
+        </div>
         <SelectCommon
-        label={"Priority"}
+          label={"Priority"}
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
           options={[
@@ -150,7 +161,7 @@ export default function TodoList() {
           className="flex-1 min-w-[150px]"
         />
         <InputCommon
-        label={"Due Date"}
+          label={"Due Date"}
           type="date"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
@@ -161,6 +172,7 @@ export default function TodoList() {
           variant="solid"
           icon={<IoMdAdd size={20} />}
           onClick={addOrUpdateTodo}
+          isLoading={isAdding} // Add loading state to button
         />
         {editId && (
           <ButtonCommon
@@ -172,15 +184,16 @@ export default function TodoList() {
       </div>
 
       {/* Filter Section */}
- 
 
-      <div className="w-[100%] max-w-[800px] mx-auto flex flex-col gap-4 mt-6">
+      <div className="w-[100%] max-w-[900px] mx-auto flex flex-col gap-4 mt-6">
         <p className="text-xl font-bold">List of Todo's</p>
 
-        {todos.length === 0 ? (
+        {todos?.length === 0 && isFetching ? (
+          <p className="text-center text-gray-500">Loading...</p>
+        ) : todos?.length === 0 ? (
           <p className="text-center text-gray-500">No todos found</p>
         ) : (
-          todos.map((item) => (
+          todos?.map((item) => (
             <div
               key={item._id}
               className={`flex flex-col bg-gray-100 shadow-sm p-4 rounded-lg ${
@@ -214,10 +227,10 @@ export default function TodoList() {
                   </p>
                 </div>
                 {/* Buttons Section */}
-                <div className="flex gap-2 mt-4 sm:mt-0 sm:ml-auto">
+                <div className="flex gap-2 flex-wrap mt-4 sm:mt-0 sm:ml-auto">
                   {item.status !== "completed" && (
                     <ButtonCommon
-                      label="Complete"
+                      label="Mark As Complete"
                       variant="success"
                       icon={<IoCheckmarkDoneCircle />}
                       className="px-3 py-1"
