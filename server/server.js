@@ -7,6 +7,7 @@ const cron = require('node-cron'); // for scheduling tasks
 
 const authRoutes = require('./routes/user.routes');
 const notesRoutes = require('./routes/notes.routes');
+const todoRoutes = require('./routes/todo.routes');
 const { sendReminders } = require('./controllers/cornjob.controller');
 const cornjobRoutes = require('./routes/cornjob.routes');
 
@@ -24,6 +25,7 @@ app.get('/',(req,res) => {
 app.use('/api/auth' , authRoutes);
 app.use('/api/notes' , notesRoutes);
 app.use('/api/cornjob' , cornjobRoutes);
+app.use('/api/todo' , todoRoutes);
 
 
 // Schedule the cron job to run every day at 10 AM

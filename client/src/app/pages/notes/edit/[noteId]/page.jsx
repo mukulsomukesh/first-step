@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation"; // Importing Next.js navigation hooks
 import { VscSaveAll } from "react-icons/vsc";
-import { TbUserShare } from "react-icons/tb";
+// import { TbUserShare } from "react-icons/tb";
 import { MdOutlineDelete } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 
@@ -29,6 +29,9 @@ export default function NoteEditorPage() {
   const [editedContent, setEditedContent] = useState(""); // Note content being edited
   const [editedReminders, setEditedReminders] = useState([]); // Reminder list being edited
   const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
+  const [isSaving, setIsSaving] = useState(false); // State for save button loading
+  const [isDeleting, setIsDeleting] = useState(false); // State for delete button loading
+  const [error, setError] = useState(null); // State for managing errors
 
   // Fetch Note Data
   useEffect(() => {
@@ -45,8 +48,11 @@ export default function NoteEditorPage() {
         setEditedContent(data.note.content);
         setEditedReminders(data.reminder || []);
         setRemindersEnabled(data.note.reminderEnabled);
+        setError(null); // Clear any previous errors
       } catch (error) {
         console.error("Failed to fetch note data:", error);
+        setError("Failed to fetch note data"); // Set error state
+        toast.error("Failed to fetch note data");
       }
     };
 
@@ -62,10 +68,7 @@ export default function NoteEditorPage() {
   const handleSaveChanges = async () => {
     if (!noteData) return;
 
-    const updatedNote = {
-      ...noteData.note,
-      content: editedContent,
-    };
+    setIsSaving(true); // Set saving state to true
 
     const payload = {
       reminderEnabled: remindersEnabled && editedReminders.length > 0, // Enable reminder if checkbox is checked and there are reminders
@@ -83,6 +86,8 @@ export default function NoteEditorPage() {
     } catch (error) {
       console.error("Error saving note changes:", error);
       toast.error("Failed to update the note");
+    } finally {
+      setIsSaving(false); // Set saving state to false
     }
   };
 
@@ -150,14 +155,18 @@ export default function NoteEditorPage() {
 
   // delete note
   const handelDeleteNote = async () => {
+    setIsDeleting(true); // Set deleting state to true
+
     try {
-      const data = await deleteNoteByIDService(noteId);
+      await deleteNoteByIDService(noteId);
       toast.success("Note successfully deleted");
       setTimeout(() => {
         router.push("/pages/notes");
       }, 2000);
     } catch (error) {
-      toast.success("Failed to delete the note");
+      toast.error("Failed to delete the note");
+    } finally {
+      setIsDeleting(false); // Set deleting state to false
     }
   };
 
@@ -165,7 +174,9 @@ export default function NoteEditorPage() {
     <div className="flex flex-col md:flex-row mt-8 gap-4 px-4 md:px-8">
       {/* Note Editor Section */}
       <div className="w-full md:w-[80%]">
-        {noteData ? (
+        {error ? (
+          <p className="text-red-500">{error}</p> // Display error message
+        ) : noteData ? (
           <div className="space-y-3 ">
             {/* Title Input */}
             <InputCommon
@@ -207,6 +218,7 @@ export default function NoteEditorPage() {
           icon={<VscSaveAll size="20" />}
           className="w-full mt-2"
           onClick={handleSaveChanges}
+          isLoading={isSaving} // Pass isLoading state to button
         />
 
         <ButtonCommon
@@ -215,6 +227,7 @@ export default function NoteEditorPage() {
           className="w-full mt-2"
           variant="danger"
           onClick={handelDeleteNote}
+          isLoading={isDeleting} // Pass isLoading state to button
         />
       </div>
 

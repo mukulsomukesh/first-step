@@ -16,6 +16,7 @@ export default function LoginComponent() {
   });
 
   const [error, setError] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const routes = useRouter();
 
   const handleChange = (e) => {
@@ -24,7 +25,7 @@ export default function LoginComponent() {
   };
 
   const handleSignup = () => {
-    const { name, email, password, confirmPassword } = formData;
+    const { email, password } = formData;
 
     let errors = {};
     if (!email) errors.email = "Email is required";
@@ -41,6 +42,7 @@ export default function LoginComponent() {
 
   // handel api call
   const handelLoginApiRequest = async (payload) => {
+    setIsLoading(true);
     try {
       const res = await loginService(payload);
       toast.success("Login success!");
@@ -49,8 +51,9 @@ export default function LoginComponent() {
       }, 1500);
     } catch (error) {
       console.log(" error ", error);
-      alert(" stipr");
       toast.error(error?.message?.response?.data?.data || "Login Failed!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -101,7 +104,9 @@ export default function LoginComponent() {
               <ButtonCommon
                 label="Login"
                 onClick={handleSignup}
-                className="w-full bg-primary-950 hover:bg-primary-800"
+                className="w-full"
+                disabled={isLoading}
+                isLoading={isLoading}
               />
             </div>
 

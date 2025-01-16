@@ -6,10 +6,13 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaRegEdit } from "react-icons/fa";
 import { RxDoubleArrowLeft } from "react-icons/rx";
-import { getNoteByIDService, markNoteAsRevisedService } from "@/app/services/notes"; // Import the new service
+import {
+  getNoteByIDService,
+  markNoteAsRevisedService,
+} from "@/app/services/notes"; // Import the new service
 import ButtonCommon from "@/app/components/commonComponents/ButtonCommon";
-import 'react-quill-new/dist/quill.snow.css';
-import 'react-quill-new/dist/quill.bubble.css';
+import "react-quill-new/dist/quill.snow.css";
+import "react-quill-new/dist/quill.bubble.css";
 
 // Badge component
 const Badge = ({ status }) => {
@@ -31,7 +34,13 @@ const Badge = ({ status }) => {
       colorClass = "bg-gray-100 text-gray-800";
   }
 
-  return <span className={`px-2 py-1 rounded-full text-sm font-semibold ${colorClass}`}>{status}</span>;
+  return (
+    <span
+      className={`px-2 py-1 rounded-full text-sm font-semibold ${colorClass}`}
+    >
+      {status}
+    </span>
+  );
 };
 
 export default function NoteViewerPage() {
@@ -42,6 +51,7 @@ export default function NoteViewerPage() {
   // State
   const [noteData, setNoteData] = useState(null); // Note data fetched from the backend
   const [isTodayReminderPending, setIsTodayReminderPending] = useState(false); // State to check if today's reminder is pending
+  const [isLoading, setIsLoading] = useState(false); // Loading state for API calls
 
   // Fetch Note Data
   useEffect(() => {
@@ -75,18 +85,19 @@ export default function NoteViewerPage() {
   // Format Reminder Date
   const formatReminderDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', { 
-      year: 'numeric', 
-      month: 'numeric', 
-      day: 'numeric', 
-      hour: 'numeric', 
-      minute: 'numeric', 
-      hour12: true 
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
     }); // Convert to readable format without seconds
   };
 
   // Handle Mark as Revised
   const handleMarkAsRevised = async () => {
+    setIsLoading(true);
     try {
       await markNoteAsRevisedService(noteId);
       toast.success("Note marked as revised.");
@@ -94,6 +105,8 @@ export default function NoteViewerPage() {
     } catch (error) {
       console.error("Failed to mark note as revised:", error);
       toast.error("Failed to mark note as revised.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -117,7 +130,9 @@ export default function NoteViewerPage() {
 
         return (
           <div key={reminder._id} className="text-gray-600">
-            <p className="font-semibold">{formatReminderDate(reminder.reminderDate)}</p>
+            <p className="font-semibold">
+              {formatReminderDate(reminder.reminderDate)}
+            </p>
             <Badge status={status} />
           </div>
         );
@@ -132,7 +147,9 @@ export default function NoteViewerPage() {
         {noteData ? (
           <div className="space-y-3">
             {/* Title */}
-            <h1 className="text-2xl font-bold bg-primary-50 p-2 rounded-md ">{noteData.note.title}</h1>
+            <h1 className="text-2xl font-bold bg-primary-50 p-2 rounded-md ">
+              {noteData.note.title}
+            </h1>
 
             {/* Render Content as HTML */}
             <div
@@ -157,6 +174,8 @@ export default function NoteViewerPage() {
             onClick={handleMarkAsRevised}
             variant="outline"
             className="w-[100%] mt-4"
+            disabled={isLoading} // Disable button while loading
+            isLoading={isLoading}
           />
         )}
 

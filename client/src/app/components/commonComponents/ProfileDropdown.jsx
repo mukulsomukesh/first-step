@@ -81,6 +81,12 @@ const ProfileDropdown = () => {
             Profile
           </li>
           <li
+            onClick={() => handleNavigation("/pages/todo")}
+            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
+          >
+            Todo
+          </li>
+          <li
             onClick={() => handleNavigation("/pages/dashboard")}
             className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
           >
@@ -92,6 +98,7 @@ const ProfileDropdown = () => {
           >
             All Notes
           </li>
+          
           {/* Logout */}
           <li
             onClick={handleLogout}
