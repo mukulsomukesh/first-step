@@ -10,12 +10,15 @@ import { createNotesService } from "@/app/services/notes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
+import { MdDelete } from "react-icons/md";
 
 export default function Page() {
   const [editorContent, setEditorContent] = useState(""); // Store the content of the note
   const [title, setTitle] = useState(""); // Store the title of the note
   const [reminderDates, setReminderDates] = useState([]); // Store the upcoming reminders
-  const router = useRouter()
+  const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
+  const [isLoading, setIsLoading] = useState(false); // State to manage loading
+  const router = useRouter();
 
   const calculateDefaultDate = (daysInterval) => {
     const now = new Date();
@@ -39,15 +42,34 @@ export default function Page() {
     setReminderDates(updatedReminderDates);
   };
 
+  // Handle checkbox change
+  const handleRemindersEnabledChange = (e) => {
+    setRemindersEnabled(e.target.checked);
+  };
+
+  // Handle removing a reminder
+  const handleRemoveReminder = (index) => {
+    const updatedReminderDates = reminderDates.filter((_, i) => i !== index);
+    setReminderDates(updatedReminderDates);
+  };
+
+  // Handle adding a new reminder
+  const handleAddReminder = () => {
+    setReminderDates([...reminderDates, calculateDefaultDate(1)]);
+  };
+
   // Build the payload when the save button is clicked
   const handleSave = async () => {
+    setIsLoading(true); // Set loading to true
     const payload = {
       title: title || "Sample Note", // Default title if not provided
       content: editorContent, // The content of the note
-      reminderEnabled: reminderDates.length > 0, // Enable reminder if there are reminders
-      upcomingReminders: reminderDates.map((reminder) => ({
-        reminderDate: reminder,
-      })), // Pass the upcoming reminders array
+      reminderEnabled: remindersEnabled && reminderDates.length > 0, // Enable reminder if checkbox is checked and there are reminders
+      upcomingReminders: remindersEnabled
+        ? reminderDates.map((reminder) => ({
+            reminderDate: reminder,
+          }))
+        : [], // Pass the upcoming reminders array if enabled
     };
 
     console.log("Payload to be sent:", payload);
@@ -55,18 +77,21 @@ export default function Page() {
     // Example: You can call an API to save the note here
     try {
       const res = await createNotesService(payload);
-      router.push(`/pages/notes/edit/${res.data._id}`)
-      toast.success("Notes successfully created! ")
+      router.push(`/pages/notes/edit/${res.data._id}`);
+      toast.success("Notes successfully created!");
     } catch (error) {
       console.log(error);
-      toast.error(error?.message?.response?.data?.data || "Notes creation failed ")
-
+      toast.error(
+        error?.message?.response?.data?.data || "Notes creation failed"
+      );
+    } finally {
+      setIsLoading(false); // Set loading to false
     }
   };
 
   return (
-    <div className="flex mt-4 gap-4 px-8">
-      <div className="w-[80%] space-y-2">
+    <div className="flex flex-col md:flex-row mt-8 gap-4 px-4 md:px-8">
+      <div className="w-full md:w-[80%] space-y-3 ">
         {/* Title Input */}
         <InputCommon
           placeholder="Notes Title"
@@ -78,17 +103,40 @@ export default function Page() {
         <TextEditor onContentChange={setEditorContent} />
       </div>
 
-      <div className="w-[20%] bg-primary-50 h-fit p-2 rounded-md">
+      <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         <div className="mt-4 flex flex-col gap-1">
-          <p className="text-[18px] font-semibold">Upcoming Reminders</p>
-          {reminderDates.map((date, index) => (
-            <InputCommon
-              key={index}
-              type="datetime-local"
-              value={date} // Bind the date to the state
-              onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={remindersEnabled}
+              onChange={handleRemindersEnabledChange}
+              className="mr-2"
             />
-          ))}
+            Enable Reminders
+          </label>
+          {remindersEnabled &&
+            reminderDates.map((date, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <InputCommon
+                  type="datetime-local"
+                  value={date} // Bind the date to the state
+                  onChange={(e) => handleReminderChange(e, index)} // Handle reminder change
+                />
+                <p
+                  className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 "
+                  onClick={() => handleRemoveReminder(index)}
+                >
+                  <MdDelete size={30} className="text-red-600" />
+                </p>
+              </div>
+            ))}
+          {remindersEnabled && (
+            <ButtonCommon
+              label="Add Reminder"
+              className="mt-2"
+              onClick={handleAddReminder}
+            />
+          )}
         </div>
 
         {/* Buttons */}
@@ -104,6 +152,8 @@ export default function Page() {
           icon={<VscSaveAll size="20" />}
           className="w-[100%] mt-2"
           onClick={handleSave} // Attach save function to button
+          disabled={isLoading} // Disable button while loading
+          isLoading={isLoading}
         />
       </div>
 

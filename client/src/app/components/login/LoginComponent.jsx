@@ -16,6 +16,7 @@ export default function LoginComponent() {
   });
 
   const [error, setError] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const routes = useRouter();
 
   const handleChange = (e) => {
@@ -24,7 +25,7 @@ export default function LoginComponent() {
   };
 
   const handleSignup = () => {
-    const { name, email, password, confirmPassword } = formData;
+    const { email, password } = formData;
 
     let errors = {};
     if (!email) errors.email = "Email is required";
@@ -41,6 +42,7 @@ export default function LoginComponent() {
 
   // handel api call
   const handelLoginApiRequest = async (payload) => {
+    setIsLoading(true);
     try {
       const res = await loginService(payload);
       toast.success("Login success!");
@@ -49,33 +51,34 @@ export default function LoginComponent() {
       }, 1500);
     } catch (error) {
       console.log(" error ", error);
-      alert(" stipr");
       toast.error(error?.message?.response?.data?.data || "Login Failed!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <div className="flex w-full h-screen text-primary-950 ">
+      <div className="flex w-full h-screen text-primary-600 ">
         {/* Left Section */}
-        <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
+        {/* <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
           <h1 className="text-4xl font-bold mb-4">Notes Revise App</h1>
           <p className="text-lg ">
             Organize your notes. <br />
             Revise with ease. <br />
             Excel in every exam!
           </p>
-        </div>
+        </div> */}
 
         {/* Right Section */}
-        <div className="bg-white w-[65%] h-full flex flex-col justify-center items-center p-8">
-          <div className=" rounded-md p-4 lg:w-[50%]">
+        <div className="bg-white w-[100%] h-full flex flex-col justify-center items-center p-8">
+          <div className=" rounded-md p-4 w-[100%] max-w-[500px] ">
             <h2 className="text-2xl font-bold text-primary-950 mb-6 text-center">
               Login
             </h2>
 
             {/* Input Fields */}
-            <div className="space-y-4">
+            <div className="space-y-4 mx-auto w-[100%]">
               <InputCommon
                 label="Email"
                 name="email"
@@ -101,17 +104,19 @@ export default function LoginComponent() {
               <ButtonCommon
                 label="Login"
                 onClick={handleSignup}
-                className="w-full bg-primary-950 hover:bg-primary-800"
+                className="w-full"
+                disabled={isLoading}
+                isLoading={isLoading}
               />
             </div>
 
             {/* Already Registered */}
-            <div className="flex justify-between mt-4">
-              <p className=" text-primary-950">
+            <div className="lg:flex justify-between items-center mt-4 ">
+              <p className=" text-primary-600">
                 Don't have account
                 <a
                   href="signup"
-                  className="text-primary-950 ml-2 font-semibold"
+                  className="text-primary-600 ml-2 font-semibold"
                 >
                   Signup
                 </a>

@@ -17,6 +17,7 @@ export default function SignupComponent() {
   });
 
   const [error, setError] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const routes = useRouter();
 
   const handleChange = (e) => {
@@ -40,12 +41,12 @@ export default function SignupComponent() {
 
     if (Object.keys(errors).length === 0) {
       handelSignupApiRequest(formData);
-      // Add your signup logic here
     }
   };
 
   // handel api call
   const handelSignupApiRequest = async (payload) => {
+    setIsLoading(true);
     try {
       const res = await signupService(payload);
       toast.success("Signup success!");
@@ -54,31 +55,22 @@ export default function SignupComponent() {
       }, 1500);
     } catch (error) {
       toast.error(error?.message?.response?.data?.data || "Signup Failed!");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <>
-      <div className="flex w-full h-screen text-primary-950 ">
-        {/* Left Section */}
-        <div className="bg-primary-200 flex flex-col justify-center items-center w-[35%] h-full p-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">Notes Revise App</h1>
-          <p className="text-lg ">
-            Organize your notes. <br />
-            Revise with ease. <br />
-            Excel in every exam!
-          </p>
-        </div>
-
-        {/* Right Section */}
-        <div className="bg-white w-[65%] h-full flex flex-col justify-center items-center p-8">
-          <div className=" rounded-md p-4 lg:w-[50%]">
+      <div className="flex w-full h-screen text-primary-600 ">
+        <div className="bg-white  mx-auto w-[100%] h-full flex flex-col justify-center items-center p-8">
+          <div className=" rounded-md p-4 w-[100%] max-w-[500px] ">
             <h2 className="text-2xl font-bold text-primary-950 mb-6 text-center">
               Sign Up
             </h2>
 
             {/* Input Fields */}
-            <div className="space-y-4">
+            <div className="space-y-4 ">
               <InputCommon
                 label="Name"
                 name="name"
@@ -123,7 +115,9 @@ export default function SignupComponent() {
               <ButtonCommon
                 label="Sign Up"
                 onClick={handleSignup}
-                className="w-full bg-primary-950 hover:bg-primary-800"
+                className="w-full"
+                disabled={isLoading}
+                isLoading={isLoading}
               />
             </div>
 

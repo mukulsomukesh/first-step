@@ -117,8 +117,67 @@ const setNewPassword = asyncHandler(async (req, res) => {
   });
 });
 
+
+const getUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id; // Assuming user ID is already available from authentication middleware
+    const user = await userModal.findById(userId).select("-password");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Update User Profile with Profile Picture Upload to Cloudinary
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { name, email, profilePicture } = req.body;
+  // Get the user ID from the request (from authentication middleware)
+  const userId = req.user.id;
+
+  // Find user by ID
+  const user = await userModal.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  // Update user fields if provided
+  if (name) user.name = name;
+  if (email) user.email = email;
+  if (profilePicture) user.profilePicture = profilePicture;
+
+  // Save updated user to the database
+  console.log(" user", user);
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    data: {
+      name: user.name,
+      email: user.email,
+      profilePicture: user.profilePicture,
+    },
+  });
+});
+
 const generateUniqueOTP = () => {
   return Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit OTP
 };
 
-module.exports = { registerUser, loginUser, forgotPassword, setNewPassword };
+module.exports = {
+  registerUser,
+  loginUser,
+  forgotPassword,
+  setNewPassword,
+  getUserProfile,
+  updateUserProfile,
+};
