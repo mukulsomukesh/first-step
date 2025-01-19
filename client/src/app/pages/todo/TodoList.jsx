@@ -190,7 +190,7 @@ export default function TodoList() {
 
         {todos?.length === 0 && isFetching ? (
           <p className="text-center text-gray-500">Loading...</p>
-        ) : todos?.length === 0 ? (
+        ) : todos?.length === 0 && !isFetching ? (
           <p className="text-center text-gray-500">No todos found</p>
         ) : (
           todos?.map((item) => (
