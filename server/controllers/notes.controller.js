@@ -6,7 +6,7 @@ const userModal = require("../modals/user.modal");
 // Create a new note
 // Create a new note with reminders
 const createNote = asyncHandler(async (req, res) => {
-  const { title, content, reminderEnabled, upcomingReminders } = req.body;
+  const { title, content, reminderEnabled, upcomingReminders, noteBookID } = req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user in the request
 
   try {
@@ -16,6 +16,7 @@ const createNote = asyncHandler(async (req, res) => {
       content,
       reminderEnabled,
       userId,
+      noteBookID
     });
 
     // Step 2: Save reminders if reminderEnabled is true
@@ -50,12 +51,12 @@ const createNote = asyncHandler(async (req, res) => {
 // Edit an existing note with reminder changes
 const editNote = asyncHandler(async (req, res) => {
   const { id } = req.params; // Note ID
-  const { title, content, reminderEnabled, status, upcomingReminders } = req.body;
+  const { title, content, reminderEnabled, status, upcomingReminders, noteBookID } = req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user
 
   const updatedNote = await Note.findOneAndUpdate(
     { _id: id, userId }, // Ensure the note belongs to the logged-in user
-    { title, content, reminderEnabled, status },
+    { title, content, reminderEnabled, status, noteBookID},
     { new: true, runValidators: true } // Return the updated note
   );
 

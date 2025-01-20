@@ -1,30 +1,17 @@
 const mongoose = require("mongoose");
 
 // Notes Schema
-const noteSchema = new mongoose.Schema(
+const noteBookSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: [true, "Title is required"],
       trim: true,
     },
-    content: {
-      type: String, // Storing HTML as a string
-      required: [true, "Content is required"],
-    },
     status: {
       type: String,
       enum: ["active", "archived", "deleted"],
       default: "active",
-    },
-    reminderEnabled: {
-      type: Boolean, // Indicates if the reminder is enabled
-      default: false,
-    },
-    noteBookID: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "NoteBook", // Reference to the User model
-      default: null,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -37,4 +24,4 @@ const noteSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Note", noteSchema);
+module.exports = mongoose.model("NoteBook", noteBookSchema);
