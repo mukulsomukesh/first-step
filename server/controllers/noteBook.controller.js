@@ -20,8 +20,38 @@ exports.createNotebook = asyncHandler(async (req, res) => {
 // Get all notebooks for a user
 exports.getAllNotebooks = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const notebooks = await NoteBook.find({ userId, status: { $ne: "deleted" } }).sort({ createdAt: -1 });
-
+  const notebooks = await NoteBook.aggregate([
+    {
+      $match: { userId: userId, status: { $ne: "deleted" } }
+    },
+    {
+      $lookup: {
+        from: "notes", // Collection name (lowercase plural of model name)
+        localField: "_id",
+        foreignField: "noteBookID",
+        as: "notes"
+      }
+    },
+    {
+      $addFields: {
+        activeNotesCount: {
+          $size: {
+            $filter: {
+              input: "$notes",
+              as: "note",
+              cond: { $eq: ["$$note.status", "active"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        notes: 0, // Exclude the notes array to avoid unnecessary data
+      }
+    },
+    { $sort: { createdAt: -1 } } // Sort notebooks by creation date
+  ]);
   res.status(200).json({ success: true, data: notebooks });
 });
 

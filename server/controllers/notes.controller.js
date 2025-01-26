@@ -9,6 +9,10 @@ const createNote = asyncHandler(async (req, res) => {
   const { title, content, reminderEnabled, upcomingReminders, noteBookID } = req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user in the request
 
+  console.log("**************")
+  console.log(noteBookID, typeof noteBookID)
+  console.log(userId, typeof userId)
+
   try {
     // Step 1: Create the note
     const note = await Note.create({
