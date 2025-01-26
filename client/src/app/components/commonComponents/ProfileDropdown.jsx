@@ -98,6 +98,12 @@ const ProfileDropdown = () => {
           >
             All Notes
           </li>
+          <li
+            onClick={() => handleNavigation("/pages/note-book")}
+            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
+          >
+            All Note Books
+          </li>
           
           {/* Logout */}
           <li

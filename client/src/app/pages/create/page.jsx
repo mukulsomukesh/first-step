@@ -5,31 +5,60 @@ import InputCommon from "@/app/components/commonComponents/InputCommon";
 import TextEditor from "@/app/components/commonComponents/TextEditor";
 import React, { useState, useEffect } from "react";
 import { VscSaveAll } from "react-icons/vsc";
-import { TbUserShare } from "react-icons/tb";
+import { MdDelete } from "react-icons/md";
 import { createNotesService } from "@/app/services/notes";
+import { getNotesBookService } from "@/app/services/noteBook";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useRouter } from "next/navigation";
-import { MdDelete } from "react-icons/md";
+import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 export default function Page() {
-  const [editorContent, setEditorContent] = useState(""); // Store the content of the note
-  const [title, setTitle] = useState(""); // Store the title of the note
-  const [reminderDates, setReminderDates] = useState([]); // Store the upcoming reminders
-  const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
-  const [isLoading, setIsLoading] = useState(false); // State to manage loading
+  const [editorContent, setEditorContent] = useState(""); 
+  const [title, setTitle] = useState(""); 
+  const [reminderDates, setReminderDates] = useState([]); 
+  const [remindersEnabled, setRemindersEnabled] = useState(true); 
+  const [isLoading, setIsLoading] = useState(false); 
+  const [notebooks, setNotebooks] = useState([]); 
+  const [selectedNotebook, setSelectedNotebook] = useState(null); 
+
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const noteBookIdFromURL = searchParams.get("noteBookId");
 
   const calculateDefaultDate = (daysInterval) => {
     const now = new Date();
-    now.setHours(19, 0, 0, 0); // Set the time to 7:00 PM
-    now.setDate(now.getDate() + daysInterval); // Add days interval to current date
-    return now.toISOString().slice(0, 16); // Format to YYYY-MM-DDTHH:MM (for datetime-local)
+    now.setHours(19, 0, 0, 0);
+    now.setDate(now.getDate() + daysInterval);
+    return now.toISOString().slice(0, 16);
+  };
+
+  const fetchNotebooks = async () => {
+    try {
+      const response = await getNotesBookService();
+      const formattedNotebooks = response.data.map((notebook) => ({
+        value: notebook._id,
+        label: notebook.title,
+      }));
+      setNotebooks(formattedNotebooks);
+
+      // Preselect the notebook if noteBookId is provided in the URL
+      if (noteBookIdFromURL) {
+        const preselectedNotebook = formattedNotebooks.find(
+          (notebook) => notebook.value === noteBookIdFromURL
+        );
+        setSelectedNotebook(preselectedNotebook || null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notebooks:", error);
+      toast.error("Failed to load notebooks.");
+    }
   };
 
   useEffect(() => {
-    // Set default reminder dates for 1 day, 3 days, 5 days, etc.
-    const defaultDates = [1, 3, 5, 7, 10].map((interval) =>
+    fetchNotebooks();
+    const defaultDates = [1, 7, 15, 30, 45].map((interval) =>
       calculateDefaultDate(interval)
     );
     setReminderDates(defaultDates);
@@ -55,16 +84,17 @@ export default function Page() {
 
   // Handle adding a new reminder
   const handleAddReminder = () => {
-    setReminderDates([...reminderDates, calculateDefaultDate(1)]);
+    setReminderDates([...reminderDates, calculateDefaultDate(reminderDates.length + 1)]);
   };
 
   // Build the payload when the save button is clicked
   const handleSave = async () => {
     setIsLoading(true); // Set loading to true
     const payload = {
-      title: title || "Sample Note", // Default title if not provided
-      content: editorContent, // The content of the note
-      reminderEnabled: remindersEnabled && reminderDates.length > 0, // Enable reminder if checkbox is checked and there are reminders
+      title: title || "Sample Note",
+      content: editorContent,
+      noteBookID: selectedNotebook?.value || null,
+      reminderEnabled: remindersEnabled && reminderDates.length > 0,
       upcomingReminders: remindersEnabled
         ? reminderDates.map((reminder) => ({
             reminderDate: reminder,
@@ -105,7 +135,17 @@ export default function Page() {
 
       <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         <div className="mt-4 flex flex-col gap-1">
-          <label className="flex items-center">
+          <div className="mb-4">
+            <label className="font-semibold mb-2 block">Select Notebook</label>
+            <Select
+              options={notebooks}
+              value={selectedNotebook}
+              onChange={setSelectedNotebook}
+              placeholder="Choose notebook..."
+            />
+          </div>
+
+          <label className="flex items-center font-semibold">
             <input
               type="checkbox"
               checked={remindersEnabled}
@@ -139,20 +179,12 @@ export default function Page() {
           )}
         </div>
 
-        {/* Buttons */}
-        {/* <ButtonCommon
-          label="Share Notes"
-          icon={<TbUserShare size="20" />}
-          className="w-[100%] mt-2"
-          variant="outline"
-        /> */}
-
         <ButtonCommon
           label="Save Changes"
           icon={<VscSaveAll size="20" />}
-          className="w-[100%] mt-2"
-          onClick={handleSave} // Attach save function to button
-          disabled={isLoading} // Disable button while loading
+          className="w-full mt-4"
+          onClick={handleSave}
+          disabled={isLoading}
           isLoading={isLoading}
         />
       </div>
