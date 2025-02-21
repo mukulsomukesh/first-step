@@ -8,12 +8,16 @@ import { useRouter } from "next/navigation";
 import { userNotesListService } from "@/app/services/notes";
 import { toast } from "react-toastify"; // Import toast notification library
 import "react-toastify/dist/ReactToastify.css"; // Import toast styles
+import { PiFolderPlusBold } from "react-icons/pi";
+import { LuNotebookPen } from "react-icons/lu";
+import CreateNotebookModal from "@/app/components/modals/CreateNotebookModal";
 
 export default function Home() {
   const [notes, setNotes] = useState([]); // State to hold notes data
   const [loading, setLoading] = useState(true); // State to handle loading
   const [error, setError] = useState(""); // State to handle error messages
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleRedirectToCreateNotes = () => {
     router.push(`/pages/create`);
@@ -41,11 +45,18 @@ export default function Home() {
 
   return (
     <div className="px-8 py-4 mt-6">
+    
       <ButtonCommon
-        label="Create New Note"
+        label="Write Notes"
         variant="solid"
         onClick={handleRedirectToCreateNotes}
-        icon={<FaNotesMedical />}
+        icon={<LuNotebookPen size={20} />}
+        className="mr-4 ml-4"
+      />
+
+      <CreateNotebookModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
 
       {loading ? (

@@ -3,10 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation"; // Importing Next.js navigation hooks
 import { VscSaveAll } from "react-icons/vsc";
-// import { TbUserShare } from "react-icons/tb";
 import { MdOutlineDelete } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
-
 import ButtonCommon from "@/app/components/commonComponents/ButtonCommon";
 import InputCommon from "@/app/components/commonComponents/InputCommon";
 import TextEditor from "@/app/components/commonComponents/TextEditor";
@@ -17,6 +15,11 @@ import {
 } from "@/app/services/notes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// import Select from "react-select";
+import { getNotesBookService } from "@/app/services/noteBook";
+import dynamic from "next/dynamic";
+
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 export default function NoteEditorPage() {
   // Router and Params
@@ -24,40 +27,68 @@ export default function NoteEditorPage() {
   const router = useRouter();
 
   // State
-  const [editedTitle, setEditedTitle] = useState(null); // Note data fetched from the backend
+  const [editedTitle, setEditedTitle] = useState(""); // Note data fetched from the backend
   const [noteData, setNoteData] = useState(null); // Note data fetched from the backend
   const [editedContent, setEditedContent] = useState(""); // Note content being edited
   const [editedReminders, setEditedReminders] = useState([]); // Reminder list being edited
-  const [remindersEnabled, setRemindersEnabled] = useState(true); // State to enable/disable reminders
+  const [remindersEnabled, setRemindersEnabled] = useState(false); // State to enable/disable reminders
   const [isSaving, setIsSaving] = useState(false); // State for save button loading
   const [isDeleting, setIsDeleting] = useState(false); // State for delete button loading
   const [error, setError] = useState(null); // State for managing errors
+  const [notebooks, setNotebooks] = useState([]); // Store fetched notebooks
+  const [selectedNotebook, setSelectedNotebook] = useState(null); // Selected notebook
 
   // Fetch Note Data
   useEffect(() => {
-    const fetchNoteData = async () => {
-      if (!noteId) return; // Exit if no noteId is provided
-
-      try {
-        const response = await getNoteByIDService(noteId);
-        const data = response.data;
-
-        // Update state with fetched data
-        setNoteData(data);
-        setEditedTitle(data.note.title);
-        setEditedContent(data.note.content);
-        setEditedReminders(data.reminder || []);
-        setRemindersEnabled(data.note.reminderEnabled);
-        setError(null); // Clear any previous errors
-      } catch (error) {
-        console.error("Failed to fetch note data:", error);
-        setError("Failed to fetch note data"); // Set error state
-        toast.error("Failed to fetch note data");
-      }
-    };
-
-    fetchNoteData();
+    if (noteId) {
+      fetchNoteData();
+    }
   }, [noteId]);
+
+  const fetchNoteData = async () => {
+    try {
+      const response = await getNoteByIDService(noteId);
+      const data = response.data;
+
+      // Update state with fetched data
+      setNoteData(data);
+      setEditedTitle(data?.note?.title);
+      setEditedContent(data?.note?.content);
+      setEditedReminders(data?.reminder || []);
+      setRemindersEnabled(data?.note?.reminderEnabled);
+
+      // console.log(data.note)
+      // Fetch notebooks and set default selected one
+       fetchNotebooks(data?.note?.noteBookID);
+
+      setError(null); // Clear any previous errors
+    } catch (error) {
+      console.error("Failed to fetch note data:", error);
+      setError("Failed to fetch note data"); // Set error state
+      toast.error("Failed to fetch note data");
+    }
+  };
+
+  // fetch all notebooks
+  const fetchNotebooks = async (defaultNotebookID) => {
+    try {
+      const response = await getNotesBookService();
+      const formattedNotebooks = response.data.map((notebook) => ({
+        value: notebook._id,
+        label: notebook.title,
+      }));
+      setNotebooks(formattedNotebooks);
+
+      // Preselect the notebook from note data
+      const preselectedNotebook = formattedNotebooks.find(
+        (notebook) => notebook.value === defaultNotebookID
+      );
+      setSelectedNotebook(preselectedNotebook || null);
+    } catch (error) {
+      console.error("Failed to fetch notebooks:", error);
+      toast.error("Failed to load notebooks.");
+    }
+  };
 
   // Handle checkbox change
   const handleRemindersEnabledChange = (e) => {
@@ -73,10 +104,13 @@ export default function NoteEditorPage() {
     const payload = {
       reminderEnabled: remindersEnabled && editedReminders.length > 0, // Enable reminder if checkbox is checked and there are reminders
       content: editedContent,
+      noteBookID: selectedNotebook?.value || noteData.note.noteBookID, // Include selected notebook ID
       title: editedTitle,
-      upcomingReminders: remindersEnabled ? editedReminders.map((reminder) => ({
-        reminderDate: reminder.reminderDate,
-      })) : [], // Pass the upcoming reminders array if enabled
+      upcomingReminders: remindersEnabled
+        ? editedReminders.map((reminder) => ({
+            reminderDate: reminder.reminderDate,
+          }))
+        : [], // Pass the upcoming reminders array if enabled
     };
 
     try {
@@ -100,7 +134,10 @@ export default function NoteEditorPage() {
 
   // Add a new reminder
   const handleAddReminder = () => {
-    setEditedReminders([...editedReminders, { reminderDate: new Date().toISOString() }]);
+    setEditedReminders([
+      ...editedReminders,
+      { reminderDate: new Date().toISOString() },
+    ]);
   };
 
   // Handle removing a reminder
@@ -116,42 +153,6 @@ export default function NoteEditorPage() {
       .toISOString()
       .slice(0, 16); // Convert to local time and format
   };
-
-  // Component for Reminders
-  const ReminderList = () => (
-    <div className="flex flex-col gap-1  ">
-      <label className="flex items-center">
-        <input
-          type="checkbox"
-          checked={remindersEnabled}
-          onChange={handleRemindersEnabledChange}
-          className="mr-2"
-        />
-        Enable Reminders
-      </label>
-      {remindersEnabled && editedReminders
-        .filter((reminder) => !reminder.isDelivered) // Show only undelivered reminders
-        .map((reminder, index) => (
-          <div key={index} className="flex items-center gap-2 ">
-            <InputCommon
-              type="datetime-local"
-              value={formatReminderDate(reminder.reminderDate)}
-              onChange={(e) => handleReminderChange(index, e.target.value)}
-            />
-            <p className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 " onClick={() => handleRemoveReminder(index)}>
-              <MdDelete size={30} className="text-red-600" />
-            </p>
-          </div>
-        ))}
-      {remindersEnabled && (
-        <ButtonCommon
-          label="Add Reminder"
-          className="mt-2"
-          onClick={handleAddReminder}
-        />
-      )}
-    </div>
-  );
 
   // delete note
   const handelDeleteNote = async () => {
@@ -202,16 +203,58 @@ export default function NoteEditorPage() {
 
       {/* Sidebar Section */}
       <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
-        {/* Reminders */}
-        <ReminderList />
+        <div className="mt-4">
+          <label className="font-semibold mb-2 block">Select Notebook</label>
+          <Select
+            key="notebook-select"
+            options={notebooks }
+            value={selectedNotebook}
+            onChange={setSelectedNotebook}
+            placeholder="Choose notebook..."
+            // isClearable
+          />
+        </div>
 
-        {/* Buttons */}
-        {/* <ButtonCommon
-          label="Share Notes"
-          icon={<TbUserShare size="20" />}
-          className="w-full mt-2"
-          variant="outline"
-        /> */}
+        {/* Reminders */}
+        <div className="flex flex-col gap-1  ">
+          <label className="flex items-center font-semibold mt-4 ">
+            <input
+              type="checkbox"
+              checked={remindersEnabled}
+              onChange={handleRemindersEnabledChange}
+              className="mr-2"
+            />
+            Enable Reminders
+          </label>
+          {remindersEnabled &&
+            editedReminders
+              .filter((reminder) => !reminder.isDelivered) // Show only undelivered reminders
+              .map((reminder, index) => (
+                <div key={index} className="flex items-center gap-2 ">
+                  <InputCommon
+                    type="datetime-local"
+                    value={formatReminderDate(reminder.reminderDate)}
+                    onChange={(e) =>
+                      handleReminderChange(index, e.target.value)
+                    }
+                  />
+                  <p
+                    className="cursor-pointer bg-red-100 p-2 rounded-md border-2 border-red-600 "
+                    onClick={() => handleRemoveReminder(index)}
+                  >
+                    <MdDelete size={30} className="text-red-600" />
+                  </p>
+                </div>
+              ))}
+          {remindersEnabled && (
+            <ButtonCommon
+              label="Add Reminder"
+              variant="outline"
+              className="mb-1"
+              onClick={handleAddReminder}
+            />
+          )}
+        </div>
 
         <ButtonCommon
           label="Save Changes"
