@@ -6,17 +6,18 @@ const SelectCommon = ({
   onChange, 
   name, 
   options, 
-  error 
+  error,
+  styling = ''
 }) => {
   return (
-    <div className="">
+    <div className={` ${styling}`}>
       {label && <label className='block text-[16px] font-semibold ' htmlFor={name}>{label}</label>}
       <select 
         id={name} 
         value={value} 
         onChange={onChange} 
         name={name} 
-        className={`p-3 h-[53px] w-full rounded-md text-[16px] border-2 bg-primary-50 border-primary-950 ${error ? 'text-danger-600 border-danger-600 bg-danger-50' : ''}`}
+        className={`p-3 h-[53px] w-full rounded-md text-[16px] border-2  border-primary-950 ${error ? 'text-danger-600 border-danger-600 bg-danger-50' : ''}`}
       >
         {options.map(option => (
           <option key={option.value} value={option.value}>
