@@ -25,10 +25,10 @@ export const userNotesListService = (payload) => {
   };
 
   //  list of user notes
-  export const getNoteByIDService = (id) => {
+  export const getNoteByIDService = (id, readingType) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let response = await axiosInstance.get(`/api/notes/${id}`);
+        let response = await axiosInstance.get(`/api/notes/${id}?readingType=${readingType}`);
         resolve(response);
       } catch (error) {
         reject({ message: error });

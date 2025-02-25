@@ -13,6 +13,7 @@ import {
 import ButtonCommon from "@/app/components/commonComponents/ButtonCommon";
 import "react-quill-new/dist/quill.snow.css";
 import "react-quill-new/dist/quill.bubble.css";
+import SelectCommon from "@/app/components/commonComponents/SelectCommon";
 
 // Badge component
 const Badge = ({ status }) => {
@@ -52,6 +53,16 @@ export default function ReadNotePageComponent() {
   const [noteData, setNoteData] = useState(null); // Note data fetched from the backend
   const [isTodayReminderPending, setIsTodayReminderPending] = useState(false); // State to check if today's reminder is pending
   const [isLoading, setIsLoading] = useState(false); // Loading state for API calls
+  const [selectedReadingType, setReadingSelectedType] = useState(""); // State for SelectCommon
+
+
+    // Select options
+    const readingSelectOptions = [
+        { value: "hand_written", label: "Hand Written Note" },
+        { value: "ai_generated_summery", label: "AI Generated Summery" },
+      ];
+  
+
 
   // Fetch Note Data
   useEffect(() => {
@@ -59,7 +70,7 @@ export default function ReadNotePageComponent() {
       if (!noteId) return; // Exit if no noteId is provided
 
       try {
-        const response = await getNoteByIDService(noteId);
+        const response = await getNoteByIDService(noteId, selectedReadingType);
         const data = response.data;
 
         // Update state with fetched data
@@ -80,7 +91,7 @@ export default function ReadNotePageComponent() {
     };
 
     fetchNoteData();
-  }, [noteId]);
+  }, [noteId, selectedReadingType]);
 
   // Format Reminder Date
   const formatReminderDate = (dateString) => {
@@ -166,6 +177,16 @@ export default function ReadNotePageComponent() {
       <div className="w-full md:w-[20%] bg-primary-50 h-fit p-2 rounded-md">
         {/* Reminders */}
         {noteData && <ReminderList />}
+
+        <SelectCommon label="Select Reading"
+        options={readingSelectOptions}
+        name="noteType"
+        value={selectedReadingType}
+        onChange={(e) => setReadingSelectedType(e.target.value)}
+        styling={"mt-4"}
+        // error={selectedType === "" ? "Please select a type" : ""}
+        />
+
 
         {/* Mark as Revised Button */}
         {isTodayReminderPending && (

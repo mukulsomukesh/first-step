@@ -2,16 +2,18 @@ const asyncHandler = require("express-async-handler");
 const Note = require("../modals/notes.modal"); // Import Note model
 const Reminder = require("../modals/notes.reminder.modal"); // Import Reminder model
 const userModal = require("../modals/user.modal");
+const { generateNoteSummary } = require("../helperFunctions/geminiOperations");
 
 // Create a new note
 // Create a new note with reminders
 const createNote = asyncHandler(async (req, res) => {
-  const { title, content, reminderEnabled, upcomingReminders, noteBookID } = req.body;
+  const { title, content, reminderEnabled, upcomingReminders, noteBookID } =
+    req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user in the request
 
-  console.log("**************")
-  console.log(noteBookID, typeof noteBookID)
-  console.log(userId, typeof userId)
+  console.log("**************");
+  console.log(noteBookID, typeof noteBookID);
+  console.log(userId, typeof userId);
 
   try {
     // Step 1: Create the note
@@ -20,7 +22,7 @@ const createNote = asyncHandler(async (req, res) => {
       content,
       reminderEnabled,
       userId,
-      noteBookID
+      noteBookID,
     });
 
     // Step 2: Save reminders if reminderEnabled is true
@@ -55,12 +57,19 @@ const createNote = asyncHandler(async (req, res) => {
 // Edit an existing note with reminder changes
 const editNote = asyncHandler(async (req, res) => {
   const { id } = req.params; // Note ID
-  const { title, content, reminderEnabled, status, upcomingReminders, noteBookID } = req.body;
+  const {
+    title,
+    content,
+    reminderEnabled,
+    status,
+    upcomingReminders,
+    noteBookID,
+  } = req.body;
   const userId = req.user._id; // Access the user ID from the authenticated user
 
   const updatedNote = await Note.findOneAndUpdate(
     { _id: id, userId }, // Ensure the note belongs to the logged-in user
-    { title, content, reminderEnabled, status, noteBookID},
+    { title, content, reminderEnabled, status, noteBookID },
     { new: true, runValidators: true } // Return the updated note
   );
 
@@ -135,9 +144,15 @@ const getAllNotesByUserId = asyncHandler(async (req, res) => {
 // Get a note by noteId including reminder details
 const getNoteById = asyncHandler(async (req, res) => {
   const { id } = req.params; // Note ID
+  const { readingType } = req.query; // Note ID
   const userId = req.user._id; // Access the user ID from the authenticated user
 
-  const note = await Note.findOne({ _id: id, userId });
+  let note = await Note.findOne({ _id: id, userId });
+
+  if (readingType == "ai_generated_summery") {
+    note.content = await generateNoteSummary(note.content);
+    // console.log("]", summery)
+  }
 
   if (!note) {
     return res.status(404).json({
@@ -161,16 +176,17 @@ const getNoteById = asyncHandler(async (req, res) => {
   });
 });
 
-
 // Get notes based on reminder conditions
 const getNotesByReminderStatus = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id; // Assuming `req.user._id` is set after user authentication
 
     // Get user details
-    const user = await userModal.findById(userId).select('name email createdAt');
+    const user = await userModal
+      .findById(userId)
+      .select("name email createdAt");
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Get the current date and normalize it (start of today in UTC)
@@ -183,47 +199,47 @@ const getNotesByReminderStatus = asyncHandler(async (req, res) => {
 
     // Get the list of notes that need revision today (reminderDate is today)
     const notesToReviseToday = await Reminder.find({
-      noteId: { $in: await Note.find({ userId }).select('_id') },
+      noteId: { $in: await Note.find({ userId }).select("_id") },
       reminderDate: { $gte: startOfToday, $lt: endOfToday }, // Reminder date is today
     })
-      .populate('noteId') // Populate the note details
+      .populate("noteId") // Populate the note details
       .exec();
 
     // Get the list of past notes that haven't been revised yet
     const pastNotesToRevise = await Reminder.find({
-      noteId: { $in: await Note.find({ userId }).select('_id') },
+      noteId: { $in: await Note.find({ userId }).select("_id") },
       reminderDate: { $lt: startOfToday }, // Past reminders
       isRevisionDone: false, // Revision not done yet
       isDeactivated: false, // Not deactivated
     })
-      .populate('noteId') // Populate the note details
+      .populate("noteId") // Populate the note details
       .exec();
 
     // Format the notes that need revision today (only title)
     const notesForRevisionToday = notesToReviseToday.map((reminder) => ({
-      noteTitle: reminder.noteId.title,        // Title of the note
+      noteTitle: reminder.noteId.title, // Title of the note
       reminderHistory: {
-        reminderDate: reminder.reminderDate,   // Reminder date
-        reminderTime: reminder.reminderTime,   // Reminder time
+        reminderDate: reminder.reminderDate, // Reminder date
+        reminderTime: reminder.reminderTime, // Reminder time
         isRevisionDone: reminder.isRevisionDone, // Status of revision
       },
       otherDetails: {
-        reminderId: reminder._id,               // Reminder ID
-        noteId: reminder.noteId._id,            // Note ID
+        reminderId: reminder._id, // Reminder ID
+        noteId: reminder.noteId._id, // Note ID
       },
     }));
 
     // Format the past notes that need revision (for past dates, only title)
     const pastNotesForRevision = pastNotesToRevise.map((reminder) => ({
-      noteTitle: reminder.noteId.title,        // Title of the note
+      noteTitle: reminder.noteId.title, // Title of the note
       reminderHistory: {
-        reminderDate: reminder.reminderDate,   // Reminder date
-        reminderTime: reminder.reminderTime,   // Reminder time
+        reminderDate: reminder.reminderDate, // Reminder date
+        reminderTime: reminder.reminderTime, // Reminder time
         isRevisionDone: reminder.isRevisionDone, // Status of revision
       },
       otherDetails: {
-        reminderId: reminder._id,               // Reminder ID
-        noteId: reminder.noteId._id,            // Note ID
+        reminderId: reminder._id, // Reminder ID
+        noteId: reminder.noteId._id, // Note ID
       },
     }));
 
@@ -237,7 +253,7 @@ const getNotesByReminderStatus = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, data: responseData });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -247,7 +263,14 @@ const markNoteAsRevised = asyncHandler(async (req, res) => {
   const userId = req.user._id; // Access the user ID from the authenticated user
 
   const reminder = await Reminder.findOneAndUpdate(
-    { noteId: id, reminderDate: { $gte: new Date().setHours(0, 0, 0, 0), $lt: new Date().setHours(23, 59, 59, 999) }, isRevisionDone: false },
+    {
+      noteId: id,
+      reminderDate: {
+        $gte: new Date().setHours(0, 0, 0, 0),
+        $lt: new Date().setHours(23, 59, 59, 999),
+      },
+      isRevisionDone: false,
+    },
     { isRevisionDone: true },
     { new: true }
   );
