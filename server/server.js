@@ -20,7 +20,7 @@ connectDB();
 app.use(express.json());
 
 app.get('/',(req,res) => {
-    res.send("A quick reminder for my you dear developer, you are a true problem solver!")
+    res.send("A quick reminder for you, dear developer: your code works… until it doesn’t. Stay awesome! 😎🚀");
 })
 
 app.use('/api/auth' , authRoutes);
