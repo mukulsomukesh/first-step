@@ -11,6 +11,7 @@ const todoRoutes = require('./routes/todo.routes');
 const { sendReminders } = require('./controllers/cornjob.controller');
 const cornjobRoutes = require('./routes/cornjob.routes');
 const noteBookRoutes = require('./routes/noteBook.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/notes' , notesRoutes);
 app.use('/api/cornjob' , cornjobRoutes);
 app.use('/api/todo' , todoRoutes);
 app.use('/api/note-book' , noteBookRoutes);
+app.use('/api/dashboard' , dashboardRoutes);
 
 
 // Schedule the cron job to run every day at 10 AM
