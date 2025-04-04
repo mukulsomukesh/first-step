@@ -11,6 +11,7 @@ const todoRoutes = require('./routes/todo.routes');
 const { sendReminders } = require('./controllers/cornjob.controller');
 const cornjobRoutes = require('./routes/cornjob.routes');
 const noteBookRoutes = require('./routes/noteBook.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 
 const app = express();
@@ -20,7 +21,7 @@ connectDB();
 app.use(express.json());
 
 app.get('/',(req,res) => {
-    res.send("A quick reminder for my you dear developer, you are a true problem solver!")
+    res.send("A quick reminder for you, dear developer: your code works… until it doesn’t. Stay awesome! 😎🚀");
 })
 
 app.use('/api/auth' , authRoutes);
@@ -28,6 +29,7 @@ app.use('/api/notes' , notesRoutes);
 app.use('/api/cornjob' , cornjobRoutes);
 app.use('/api/todo' , todoRoutes);
 app.use('/api/note-book' , noteBookRoutes);
+app.use('/api/dashboard' , dashboardRoutes);
 
 
 // Schedule the cron job to run every day at 10 AM
