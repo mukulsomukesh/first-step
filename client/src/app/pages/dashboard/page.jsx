@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { BarChart, Bar,  PieChart, Pie, Tooltip, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Legend, Cell,} from "recharts";
 import { FaTasks, FaBell, FaRegClock,} from "react-icons/fa";
 import { getDashboardRevisionAndTodoList, getDashboardStats, getDashboardStudyProgressChart,} from "@/app/services/dashboard";
+import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
+  const router = useRouter();
   const [selectedReport, setSelectedReport] = useState("30_days");
   const [statsData, setStatsData] = useState([]);
   const [revisionAndTodosData, setRevisionAndTodosData] = useState([]);
@@ -164,7 +166,8 @@ const Dashboard = () => {
                   </div>
 
                   {/* Revise Button */}
-                  <button className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-600 px-4 py-2 rounded-md transition-colors">
+                  <button className="flex items-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-600 px-4 py-2 rounded-md transition-colors"
+                  onClick={()=>{ router.push(`/pages/notes/read/${revision.id}`)  }}   >
                     <i className="fas fa-play"></i>
                     <span className="text-sm font-medium">Revise</span>
                   </button>

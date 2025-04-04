@@ -113,10 +113,13 @@ exports.scheduledRevisionsAndTodos = asyncHandler(async (req, res) => {
       .populate("noteBookID", "title") // Get notebook title
       .select("_id title noteBookID");
 
+      console.log(" userNotes", userNotes);
+
     // Map notes to store unique note data
     const noteMap = new Map();
     userNotes.forEach((note) => {
       noteMap.set(note._id.toString(), {
+        id: note._id,
         title: note.title,
         notebook: note.noteBookID ? note.noteBookID.title : "No Notebook",
         previousReminders: [],
