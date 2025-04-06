@@ -41,7 +41,9 @@ const ListItem = ({ title, notebook, reminders, onClick }) => (
       <div className="flex items-baseline gap-2 mb-1">
         <h3 className="text-base font-semibold text-gray-800">{title}</h3>
         {notebook && (
-          <span className="text-sm text-gray-500 flex items-center">{notebook}</span>
+          <span className="text-sm text-gray-500 flex items-center">
+            {notebook}
+          </span>
         )}
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -88,7 +90,10 @@ const DashboardPageComponent = () => {
         { key: "Notes Created", value: response?.data.createdNotes },
         { key: "Todos Created", value: response?.data.todosCreated },
         { key: "Todos Completed", value: response?.data.todosCompleted },
-        { key: "Scheduled Revisions", value: response?.data.revisionsScheduled },
+        {
+          key: "Scheduled Revisions",
+          value: response?.data.revisionsScheduled,
+        },
         { key: "Completed Revisions", value: response?.data.revisionsDone },
         { key: "Missed Revisions", value: response?.data.revisionMissed },
         { key: "Total Notebooks", value: response?.data.totalNotebooks },
@@ -136,15 +141,34 @@ const DashboardPageComponent = () => {
   }, []);
 
   const filteredSortedRevisions = revisionAndTodosData?.scheduledRevisions
-    ?.filter((rev) => (revisionNotebookFilter ? rev.notebook === revisionNotebookFilter : true))
-    ?.sort((a, b) => (revisionSortByCount ? b.previousReminders.length - a.previousReminders.length : 0));
+    ?.filter((rev) =>
+      revisionNotebookFilter ? rev.notebook === revisionNotebookFilter : true
+    )
+    ?.sort((a, b) =>
+      revisionSortByCount
+        ? b.previousReminders.length - a.previousReminders.length
+        : 0
+    );
 
   const filteredSortedTasks = revisionAndTodosData?.pendingTodos
-    ?.filter((todo) => (taskPriorityFilter ? todo.priority === taskPriorityFilter : true))
+    ?.filter((todo) =>
+      taskPriorityFilter ? todo.priority === taskPriorityFilter : true
+    )
     ?.sort((a, b) => {
       const dateA = new Date(a.endDate);
       const dateB = new Date(b.endDate);
       return taskSortAsc ? dateA - dateB : dateB - dateA;
+    });
+
+  const filteredAndSortedTodos = revisionAndTodosData?.pendingTodos
+    ?.filter((item) => {
+      if (!taskPriorityFilter) return true;
+      return item.priority === taskPriorityFilter;
+    })
+    ?.sort((a, b) => {
+      return taskSortAsc
+        ? new Date(a.endDate) - new Date(b.endDate)
+        : new Date(b.endDate) - new Date(a.endDate);
     });
 
   return (
@@ -153,7 +177,9 @@ const DashboardPageComponent = () => {
       <div className="col-span-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Study Dashboard</h2>
-          <p className="text-sm text-gray-500">Last Updated: {new Date().toLocaleTimeString()}</p>
+          <p className="text-sm text-gray-500">
+            Last Updated: {new Date().toLocaleTimeString()}
+          </p>
         </div>
         <select
           value={selectedReport}
@@ -169,10 +195,17 @@ const DashboardPageComponent = () => {
       {/* Stats */}
       <div className="col-span-4 grid grid-cols-2 md:grid-cols-6 gap-4">
         {loadingStats ? (
-          <p className="col-span-6 text-center text-gray-500">Loading stats...</p>
+          <p className="col-span-6 text-center text-gray-500">
+            Loading stats...
+          </p>
         ) : (
           statsData.map((item, key) => (
-            <StatCard key={key} title={item.key.replace(/([A-Z])/g, " $1")} value={item.value} icon={FaRegClock} />
+            <StatCard
+              key={key}
+              title={item.key.replace(/([A-Z])/g, " $1")}
+              value={item.value}
+              icon={FaRegClock}
+            />
           ))
         )}
       </div>
@@ -181,17 +214,23 @@ const DashboardPageComponent = () => {
       <div className="col-span-4 grid md:grid-cols-2 gap-6">
         {/* Revisions */}
         <div className="bg-white rounded-xl shadow-md border border-gray-200">
-          <div className="flex justify-between items-center px-4 pt-4">
-            <h3 className="text-lg font-semibold flex items-center text-gray-800 mb-4">
+          <div className="flex justify-between items-center px-4 pt-4 mb-4 ">
+            <h3 className="text-lg font-semibold inline-flex items-center text-gray-800">
               <FaBell className="text-purple-600 mr-2" /> Today's Revisions
             </h3>
             <div className="flex gap-2">
               <select
                 onChange={(e) => setRevisionNotebookFilter(e.target.value)}
-                className="border rounded px-2 py-1 text-sm"
+                className="border border-neutral-400 rounded px-3 py-2 text-sm bg-white shadow-sm"
               >
-                <option value="">All</option>
-                {[...new Set(revisionAndTodosData?.scheduledRevisions?.map((r) => r.notebook))].map((nb, i) => (
+                <option value="">Select Notebook</option>
+                {[
+                  ...new Set(
+                    revisionAndTodosData?.scheduledRevisions?.map(
+                      (r) => r.notebook
+                    )
+                  ),
+                ].map((nb, i) => (
                   <option key={i} value={nb}>
                     {nb}
                   </option>
@@ -209,7 +248,9 @@ const DashboardPageComponent = () => {
                   title={revision.title}
                   notebook={revision.notebook}
                   reminders={revision.previousReminders}
-                  onClick={() => router.push(`/pages/notes/read/${revision.id}`)}
+                  onClick={() =>
+                    router.push(`/pages/notes/read/${revision.id}`)
+                  }
                 />
               ))
             )}
@@ -218,23 +259,33 @@ const DashboardPageComponent = () => {
 
         {/* Tasks */}
         <div className="bg-white rounded-xl shadow-md border border-gray-200">
-          <div className="flex justify-between items-center px-4 pt-4">
-            <h3 className="text-lg font-semibold flex items-center text-gray-800 mb-4">
+          <div className="flex justify-between items-center px-4 pt-4 mb-4 ">
+            <h3 className="text-lg font-semibold inline-flex items-center text-gray-800">
               <FaTasks className="text-green-600 mr-2" /> Today's Tasks
             </h3>
-            <div className="flex gap-2">
+
+            <div className="flex justify-end items-center gap-4">
+              {/* Priority Filter */}
               <select
                 onChange={(e) => setTaskPriorityFilter(e.target.value)}
-                className="border rounded px-2 py-1 text-sm"
+                className="border border-neutral-400 rounded px-3 py-2 text-sm bg-white shadow-sm"
+                value={taskPriorityFilter}
               >
-                <option value="">All</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="">Select Priority</option>
+                <option value="high">High Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="low">Low Priority</option>
               </select>
-              <button onClick={() => setTaskSortAsc((prev) => !prev)} className="text-sm underline text-blue-600">
-                Sort by Due {taskSortAsc ? "↑" : "↓"}
-              </button>
+
+              {/* Sort by Due Date */}
+              <select
+                onChange={(e) => setTaskSortAsc(e.target.value === "asc")}
+                className="border border-neutral-400 rounded px-3 py-2 text-sm bg-white shadow-sm"
+                value={taskSortAsc ? "asc" : "desc"}
+              >
+                <option value="asc">Sort from New to Old</option>
+                <option value="desc">Sort from Old to New</option>
+              </select>
             </div>
           </div>
           <div className="space-y-2 h-[500px] overflow-y-auto px-4">
@@ -242,12 +293,21 @@ const DashboardPageComponent = () => {
               <p className="text-center text-gray-500">Loading tasks...</p>
             ) : (
               filteredSortedTasks?.map((item, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg shadow-xs">
+                <div
+                  key={index}
+                  className="p-3 bg-gray-50 rounded-lg shadow-xs"
+                >
                   <p className="text-gray-700 font-medium">{item.task}</p>
                   <div className="flex items-center gap-4 flex-wrap">
-                    <span className="text-sm text-gray-500">Created: {new Date(item.createdAt).toLocaleDateString()}</span>
-                    <span className="text-sm text-gray-500">Due: {new Date(item.endDate).toLocaleDateString()}</span>
-                    <span className="text-sm text-gray-500">Status: {item?.status}</span>
+                    <span className="text-sm text-gray-500">
+                      Created: {new Date(item.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Due: {new Date(item.endDate).toLocaleDateString()}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      Status: {item?.status}
+                    </span>
                     <span
                       className={`text-xs px-2 py-1 rounded-full font-semibold w-fit ${
                         item.priority === "high"
@@ -257,7 +317,8 @@ const DashboardPageComponent = () => {
                           : "bg-green-400 text-black"
                       }`}
                     >
-                      {item.priority.charAt(0).toUpperCase() + item.priority.slice(1)}
+                      {item.priority.charAt(0).toUpperCase() +
+                        item.priority.slice(1)}
                     </span>
                   </div>
                 </div>
@@ -272,7 +333,9 @@ const DashboardPageComponent = () => {
         <h3 className="text-lg font-semibold mb-4">Study Progress</h3>
         <div className="h-80">
           {loadingStudyProgress ? (
-            <p className="text-center text-gray-500">Loading study progress...</p>
+            <p className="text-center text-gray-500">
+              Loading study progress...
+            </p>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={studyProgressChartData}>
