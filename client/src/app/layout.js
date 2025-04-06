@@ -36,7 +36,7 @@ export default function RootLayout({ children }) {
             <Navbar />
             <main className="mt-16 min-h-[95vh] ">{children}</main>
 
-            {/* <Footer /> */}
+            <Footer />
           </div>
 
           <ToastContainer />
