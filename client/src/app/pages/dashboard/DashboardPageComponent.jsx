@@ -35,24 +35,32 @@ const StatCard = ({ title, value, icon: Icon }) => (
 );
 
 // Reusable ListItem Component
-const ListItem = ({ title, notebook, reminders, onClick }) => (
+const ListItem = ({
+  title,
+  notebook,
+  reminders,
+  onClick,
+  latestScheduledRevision,
+}) => (
   <div className="p-3 bg-gray-50 rounded-lg shadow-xs border border-gray-100 flex items-center justify-between">
     <div className="flex-1">
       <div className="flex items-baseline gap-2 mb-1">
         <h3 className="text-base font-semibold text-gray-800">{title}</h3>
-        {notebook && (
-          <span className="text-sm text-gray-500 flex items-center">
-            {notebook}
-          </span>
-        )}
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-600">
         <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md">
-          Revise Done {reminders.filter((r) => r.isRevisionDone).length}
+          {"Subject - " + notebook}
         </p>
         <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-          Revisions scheduled {reminders.length}
+          Revision Date -{" "}
+          {new Date(latestScheduledRevision).toLocaleDateString()}
         </p>
+        {/* <p className="font-semibold text-green-600 bg-green-50 px-2 py-1 rounded-md">
+          Revise Done {reminders.filter((r) => r.isRevisionDone).length}
+        </p> */}
+        {/* <p className="font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
+          Revisions scheduled {reminders.length}
+        </p> */}
       </div>
     </div>
     <button
@@ -160,31 +168,17 @@ const DashboardPageComponent = () => {
       return taskSortAsc ? dateA - dateB : dateB - dateA;
     });
 
-  const filteredAndSortedTodos = revisionAndTodosData?.pendingTodos
-    ?.filter((item) => {
-      if (!taskPriorityFilter) return true;
-      return item.priority === taskPriorityFilter;
-    })
-    ?.sort((a, b) => {
-      return taskSortAsc
-        ? new Date(a.endDate) - new Date(b.endDate)
-        : new Date(b.endDate) - new Date(a.endDate);
-    });
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-gray-50">
       {/* Header */}
       <div className="col-span-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Study Dashboard</h2>
-          <p className="text-sm text-gray-500">
-            Last Updated: {new Date().toLocaleTimeString()}
-          </p>
         </div>
         <select
           value={selectedReport}
           onChange={(e) => setSelectedReport(e.target.value)}
-          className="border p-2 rounded-md bg-white shadow-sm"
+          className="border border-neutral-400 rounded px-3 py-2 text-sm bg-white shadow-sm"
         >
           <option value="7_days">Last 7 Days</option>
           <option value="30_days">Last 30 Days</option>
@@ -248,6 +242,7 @@ const DashboardPageComponent = () => {
                   title={revision.title}
                   notebook={revision.notebook}
                   reminders={revision.previousReminders}
+                  latestScheduledRevision={revision.latestScheduledRevision}
                   onClick={() =>
                     router.push(`/pages/notes/read/${revision.id}`)
                   }
@@ -298,16 +293,18 @@ const DashboardPageComponent = () => {
                   className="p-3 bg-gray-50 rounded-lg shadow-xs"
                 >
                   <p className="text-gray-700 font-medium">{item.task}</p>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <span className="text-sm text-gray-500">
-                      Created: {new Date(item.createdAt).toLocaleDateString()}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      Due: {new Date(item.endDate).toLocaleDateString()}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      Status: {item?.status}
-                    </span>
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <p>
+                      <span className="text-sm text-gray-500">
+                        Created: {new Date(item.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        Due: {new Date(item.endDate).toLocaleDateString()}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        Status: {item?.status}
+                      </span>
+                    </p>
                     <span
                       className={`text-xs px-2 py-1 rounded-full font-semibold w-fit ${
                         item.priority === "high"
@@ -317,7 +314,7 @@ const DashboardPageComponent = () => {
                           : "bg-green-400 text-black"
                       }`}
                     >
-                      {item.priority.charAt(0).toUpperCase() +
+                      { item.priority.charAt(0).toUpperCase() +
                         item.priority.slice(1)}
                     </span>
                   </div>
