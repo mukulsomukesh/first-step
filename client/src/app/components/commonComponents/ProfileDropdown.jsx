@@ -1,116 +1,136 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { FaUserCircle } from "react-icons/fa";
+import { useRouter, usePathname } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import {
+  FaUserCircle,
+  FaHome,
+  FaBook,
+  FaStickyNote,
+  FaList,
+  FaUser,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import { toast } from "react-toastify";
+
+const menuItems = [
+  { label: "Dashboard", icon: <FaHome />, path: "/pages/dashboard" },
+  { label: "Notebooks", icon: <FaBook />, path: "/pages/note-book" },
+  { label: "Notes", icon: <FaStickyNote />, path: "/pages/notes" },
+  { label: "To-Do List", icon: <FaList />, path: "/pages/todo" },
+  { label: "Profile", icon: <FaUser />, path: "/pages/profile" },
+];
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const router = useRouter();
+  const pathname = usePathname();
 
+  // Load user from localStorage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserDetails = localStorage.getItem("notesMasterUserDetails");
-      if (storedUserDetails) {
-        setUserDetails(JSON.parse(storedUserDetails));
-      }
+    const stored = localStorage.getItem("notesMasterUserDetails");
+    if (stored) {
+      setUserDetails(JSON.parse(stored));
     }
   }, []);
 
-  // handle logout
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token"); // Clear the token from localStorage
-      toast.success("Logged out successfully!"); // Display a success message
-      router.push("/pages/login"); // Redirect to the login page
-    }
-  };
+  // Logout handler
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("token");
+    toast.success("Logged out successfully!");
+    router.push("/pages/login");
+  }, [router]);
 
-  // handle navigation for menu items
-  const handleNavigation = (path) => {
-    router.push(path); // Navigate to the passed path
-  };
+  // Navigation handler
+  const handleNavigation = useCallback(
+    (path) => {
+      setIsOpen(false);
+      router.push(path);
+    },
+    [router]
+  );
 
-  // Close the dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isOpen && !event.target.closest(".profile-dropdown")) {
+    const handleClickOutside = (e) => {
+      if (isOpen && !e.target.closest(".profile-dropdown")) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
+  // Capitalize first name
+  const displayName = userDetails?.name?.split(" ")[0] || "";
+  const capitalized =
+    displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
+  // Active menu checker
+  const isActive = (path) => pathname === path;
+
   return (
-    <div className="relative text-primary-950 profile-dropdown">
+    <div className="relative text-black profile-dropdown z-50">
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-10" onClick={() => setIsOpen(false)}></div>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-10"
+          onClick={() => setIsOpen(false)}
+        ></div>
       )}
+
+      {/* Profile Toggle */}
       <button
-        className="flex items-center space-x-2 z-20 relative bg-primary-50 rounded-md p-2"
-        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 bg-primary-50 rounded-md px-3 py-2 focus:outline-none"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
       >
         {userDetails?.name && (
-          <strong className="text-primary-600 text-[20px] ">
-            Hi, {userDetails.name.split(" ")[0].charAt(0).toUpperCase() + userDetails.name.split(" ")[0].slice(1)}
-          </strong>
+          <span className="text-primary-400 text-2xl font-semibold">
+            Hi, {capitalized}
+          </span>
         )}
         {userDetails?.profilePicture ? (
           <img
             src={userDetails.profilePicture}
-            alt="User Profile"
-            className="w-12 h-12 rounded-full border-2 border-primary-600"
+            alt="Profile"
+            className="w-10 h-10 rounded-full border-2 border-primary-600 object-cover"
+            title={capitalized}
           />
         ) : (
-          <FaUserCircle className="text-primary-950 text-4xl" />
+          <FaUserCircle className="text-primary-950 text-3xl" />
         )}
       </button>
+
+      {/* Dropdown Menu */}
       {isOpen && (
-        <ul className="absolute min-w-[200px] right-0 mt-2 bg-primary-50 shadow-xl border-2 border-primary-600 border-t rounded-md overflow-hidden z-20">
-          {/* Menu items */}
-          <li
-            onClick={() => handleNavigation("/pages/profile")}
-            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
-          >
-            Profile
-          </li>
-          <li
-            onClick={() => handleNavigation("/pages/todo")}
-            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
-          >
-            Todo
-          </li>
-          <li
-            onClick={() => handleNavigation("/pages/dashboard")}
-            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
-          >
-            Dashboard
-          </li>
-          <li
-            onClick={() => handleNavigation("/pages/notes")}
-            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
-          >
-            All Notes
-          </li>
-          <li
-            onClick={() => handleNavigation("/pages/note-book")}
-            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
-          >
-            All Note Books
-          </li>
-          
+        <ul
+          className=" overflow-hidden absolute right-0 mt-2 min-w-[220px] bg-primary-50 rounded-md shadow-xl z-20 "
+          role="menu"
+        >
+          {menuItems.map((item) => (
+            <li
+              key={item.label}
+              onClick={() => handleNavigation(item.path)}
+              className={`flex items-center gap-2 px-4 py-3 cursor-pointer transition-colors  ${
+                isActive(item.path)
+                  ? "bg-primary-600 text-white"
+                  : "hover:bg-primary-600 hover:text-white "
+              }`}
+              role="menuitem"
+            >
+              {item.icon} {item.label}
+            </li>
+          ))}
+
           {/* Logout */}
           <li
             onClick={handleLogout}
-            className="p-2 transition-transform duration-300 ease-in-out hover:bg-primary-600 hover:text-primary-100 cursor-pointer"
+            className="border-t border-black  flex items-center gap-2 px-4 py-3  text-red-600 hover:bg-red-600 hover:text-white cursor-pointer transition-colors"
+            role="menuitem"
           >
-            Logout
+            <FaSignOutAlt /> Logout
           </li>
         </ul>
       )}
