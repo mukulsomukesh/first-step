@@ -47,7 +47,7 @@ export default function LoginComponent() {
       const res = await loginService(payload);
       toast.success("Login success!");
       setTimeout(() => {
-        routes.push("/pages/notes");
+        routes.push("/pages/dashboard");
       }, 1500);
     } catch (error) {
       console.log(" error ", error);
